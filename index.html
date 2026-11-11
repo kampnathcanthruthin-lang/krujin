@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบฝึกพูดภาษาจีนในห้องเรียน</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+    .container {
+      background: white;
+      padding: 35px;
+      border-radius: 24px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+      text-align: center;
+      max-width: 520px;
+      width: 90%;
+    }
+    h1 { color: #0284c7; font-size: 24px; margin-bottom: 5px; }
+    .subtitle { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+    
+    /* กล่องสำหรับคุณครูกรอกประโยค */
+    .teacher-box {
+      background-color: #f8fafc;
+      border: 2px solid #cbd5e1;
+      border-radius: 14px;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .teacher-box label { font-weight: bold; color: #334155; font-size: 14px; display: block; margin-bottom: 5px; }
+    .teacher-box input {
+      width: 100%;
+      padding: 10px;
+      font-size: 18px;
+      border: 1px solid #94a3b8;
+      border-radius: 8px;
+      box-sizing: border-box;
+    }
+    .teacher-box button {
+      margin-top: 10px;
+      background-color: #0284c7;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+      font-size: 16px;
+    }
+    .teacher-box button:hover { background-color: #0369a1; }
+
+    /* กล่องโจทย์ให้เด็กอ่าน */
+    .target-box {
+      background-color: #e0f2fe;
+      border: 3px dashed #0284c7;
+      border-radius: 18px;
+      padding: 20px;
+      margin: 15px 0;
+    }
+    .chinese { font-size: 42px; color: #0f172a; margin: 5px 0; font-weight: bold; word-break: break-all; }
+
+    .btn-mic {
+      background-color: #22c55e;
+      color: white;
+      border: none;
+      padding: 16px 30px;
+      font-size: 20px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 10px rgba(34,197,94,0.3);
+      font-weight: bold;
+      width: 100%;
+    }
+    .btn-mic:hover { background-color: #16a34a; transform: scale(1.02); }
+    .btn-mic.listening { background-color: #ef4444; animation: pulse 1.5s infinite; }
+
+    .result-box { margin-top: 15px; font-size: 16px; color: #334155; min-height: 40px; }
+    
+    .success-popup {
+      display: none;
+      background-color: #dcfce7;
+      color: #15803d;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 15px;
+      font-size: 20px;
+      font-weight: bold;
+      animation: bounceIn 0.5s;
+    }
+
+    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+    @keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>👩‍🏫 ระบบฝึกพูดภาษาจีน</h1>
+  <div class="subtitle">พิมพ์ประโยคที่ต้องการ แล้วให้เด็กๆ อ่านออกเสียงผ่านไมค์</div>
+
+  <!-- โซนให้คุณครูกรอกประโยคเอง -->
+  <div class="teacher-box">
+    <label>✏️ สำหรับคุณครู: พิมพ์ประโยคภาษาจีนที่ต้องการ</label>
+    <input type="text" id="customInput" value="今天老师很好。" placeholder="เช่น 今天老师很好。">
+    <button onclick="setCustomTarget()">ตั้งเป็นโจทย์ให้เด็กอ่าน</button>
+  </div>
+
+  <!-- โซนโจทย์สำหรับนักเรียน -->
+  <div class="target-box">
+    <div style="font-size: 14px; color: #0369a1; font-weight: bold;">ประโยคฝึกอ่านสำหรับนักเรียน:</div>
+    <div class="chinese" id="targetChinese">今天老师很好。</div>
+  </div>
+
+  <button class="btn-mic" id="micBtn" onclick="toggleListening()">🎤 กดเพื่อเริ่มพูด</button>
+
+  <div class="result-box" id="resultText">กดปุ่มไมค์ แล้วอ่านออกเสียงตามประโยคด้านบนได้เลยครับ</div>
+  
+  <div class="success-popup" id="successPopup">
+    🎉 เก่งมาก! อ่านถูกต้องแล้ว! 🌟
+  </div>
+</div>
+
+<script>
+  let targetSentence = "今天老师很好。";
+  let isListening = false;
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition;
+
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.lang = 'zh-CN'; // ตั้งค่าระบบรับเสียงเป็นภาษาจีนกลาง
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onresult = function(event) {
+      const spokenText = event.results[0][0].transcript;
+      document.getElementById('resultText').innerHTML = `ระบบได้ยินเด็กพูด: <b style="color:#0284c7">"${spokenText}"</b>`;
+      
+      // ทำความสะอาดข้อความ ตัดเครื่องหมายคำพูดหรือจุดออก เพื่อเทียบคำให้แม่นยำขึ้น
+      const cleanTarget = targetSentence.replace(/[。！？，,.]/g, "").trim();
+      const cleanSpoken = spokenText.replace(/[。！？，,.]/g, "").trim();
+
+      // ตรวจสอบความถูกต้องว่าเสียงที่พูดตรงกับโจทย์ไหม
+      if (cleanSpoken.includes(cleanTarget) || cleanTarget.includes(cleanSpoken)) {
+        document.getElementById('successPopup').style.display = 'block';
+      } else {
+        document.getElementById('successPopup').style.display = 'none';
+      }
+    };
+
+    recognition.onend = function() {
+      isListening = false;
+      const btn = document.getElementById('micBtn');
+      btn.innerText = '🎤 กดเพื่อเริ่มพูด';
+      btn.classList.remove('listening');
+    };
+  } else {
+    alert("เบราว์เซอร์นี้ไม่รองรับการแปลงเสียงพูด แนะนำให้ใช้ Google Chrome ครับ");
+  }
+
+  // ฟังก์ชันกดเปลี่ยนโจทย์ตามที่คุณครูพิมพ์
+  function setCustomTarget() {
+    const inputVal = document.getElementById('customInput').value.trim();
+    if (inputVal === "") {
+      alert("กรุณากรอกประโยคภาษาจีนก่อนครับ");
+      return;
+    }
+    targetSentence = inputVal;
+    document.getElementById('targetChinese').innerText = targetSentence;
+    document.getElementById('resultText').innerText = 'เปลี่ยนโจทย์เรียบร้อย! ให้เด็กๆ ลองกดไมค์อ่านได้เลย';
+    document.getElementById('successPopup').style.display = 'none';
+  }
+
+  // ฟังก์ชันควบคุมการเปิด-ปิดไมค์
+  function toggleListening() {
+    if (!recognition) return;
+    const btn = document.getElementById('micBtn');
+    
+    if (!isListening) {
+      recognition.start();
+      isListening = true;
+      btn.innerText = '🛑 กำลังฟังเสียง... พูดเลย!';
+      btn.classList.add('listening');
+      document.getElementById('successPopup').style.display = 'none';
+      document.getElementById('resultText').innerText = 'กำลังฟังเสียง...';
+    } else {
+      recognition.stop();
+    }
+  }
+</script>
+
+</body>
+</html>
