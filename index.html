@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Lumina Edition</title>
+  <title>ระบบฝึกพูดภาษาจีน - Lumina Glass Edition</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   
   <style>
     @font-face {
@@ -19,13 +19,14 @@
       url("https://db.onlinewebfonts.com/t/a64ff11d2c24584c767f6257e880dc65.svg#Helvetica Regular")format("svg");
     }
 
+    /* Liquid Glass Effect */
     .liquid-glass {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(20, 20, 25, 0.45);
       background-blend-mode: luminosity;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border: none;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 20px 40px rgba(0,0,0,0.4);
+      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.18), 0 30px 60px rgba(0,0,0,0.5);
       position: relative;
       overflow: hidden;
     }
@@ -34,11 +35,11 @@
       position: absolute;
       inset: 0;
       border-radius: inherit;
-      padding: 1.4px;
+      padding: 1.5px;
       background: linear-gradient(180deg,
-        rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
+        rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.15) 20%,
         rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
-        rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+        rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.5) 100%);
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
@@ -46,7 +47,7 @@
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;background:#111;color:#fff;font-family:"Helvetica Regular", Montserrat, sans-serif; -webkit-font-smoothing:antialiased;}
+    html,body{height:100%;background:#0a0a0c;color:#fff;font-family:"Helvetica Regular", Montserrat, sans-serif; -webkit-font-smoothing:antialiased;}
     
     main {
       position: relative;
@@ -56,7 +57,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      selection-background-color: rgba(255,255,255,0.2);
     }
 
     video {
@@ -72,101 +72,115 @@
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 800px;
+      max-width: 820px;
       margin: 0 auto;
-      padding: 40px 20px;
+      padding: 50px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       flex: 1;
     }
 
-    /* สไตล์ตัวแอปฝึกพูดภาษาจีนแบบพรีเมียม */
+    /* แอปฝึกพูดภาษาจีน ดีไซน์ Liquid Glass กลมกลืนกับธีม */
     .app-card {
-      background: rgba(15, 15, 20, 0.65);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 24px;
-      padding: 35px;
+      background: rgba(18, 18, 24, 0.55);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 2rem;
+      padding: 40px;
       width: 100%;
-      box-shadow: 0 24px 60px rgba(0,0,0,0.6);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.2), 0 30px 60px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.08);
       text-align: center;
-      margin-top: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .app-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.5px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.2) 100%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
     }
 
-    h1 { color: #fff; font-size: 26px; margin-bottom: 8px; font-weight: 600; letter-spacing: -0.02em; }
-    .subtitle { color: rgba(255,255,255,0.6); font-size: 14px; margin-bottom: 25px; }
+    h1 { color: #fff; font-size: 28px; margin-bottom: 8px; font-weight: 700; letter-spacing: -0.02em; }
+    .subtitle { color: rgba(255,255,255,0.65); font-size: 14px; margin-bottom: 30px; font-weight: 400; }
 
     .teacher-box {
-      background: rgba(255, 255, 255, 0.04);
+      background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 18px;
+      border-radius: 16px;
+      padding: 20px;
       margin-bottom: 25px;
       text-align: left;
     }
-    .teacher-box label { font-weight: 500; color: rgba(255,255,255,0.8); font-size: 13px; display: block; margin-bottom: 8px; }
+    .teacher-box label { font-weight: 500; color: rgba(255,255,255,0.85); font-size: 13px; display: block; margin-bottom: 10px; }
     .teacher-box input {
       width: 100%;
-      padding: 12px 14px;
+      padding: 14px 16px;
       font-size: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      background: rgba(0, 0, 0, 0.4);
       color: #fff;
       outline: none;
       box-sizing: border-box;
+      font-family: inherit;
     }
-    .teacher-box input:focus { border-color: rgba(255, 255, 255, 0.4); }
+    .teacher-box input:focus { border-color: rgba(255, 255, 255, 0.4); background: rgba(0,0,0,0.6); }
     .teacher-box button {
-      margin-top: 12px;
+      margin-top: 14px;
       background: #ffffff;
-      color: #000;
+      color: #0f172a;
       border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
+      padding: 12px;
+      border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
       width: 100%;
       font-size: 15px;
-      transition: background 0.2s;
+      transition: all 0.2s;
     }
-    .teacher-box button:hover { background: #e2e8f0; }
+    .teacher-box button:hover { background: #f1f5f9; transform: translateY(-1px); }
 
     .target-box {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.03);
       border: 1px dashed rgba(255, 255, 255, 0.2);
-      border-radius: 16px;
-      padding: 24px;
+      border-radius: 18px;
+      padding: 28px;
       margin: 20px 0;
     }
-    .chinese { font-size: 42px; color: #fff; margin: 8px 0; font-weight: bold; word-break: break-all; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    .chinese { font-size: 46px; color: #fff; margin: 8px 0; font-weight: bold; word-break: break-all; text-shadow: 0 4px 20px rgba(0,0,0,0.6); }
 
     .reveal-box {
       display: none;
-      background-color: rgba(20, 83, 45, 0.6);
+      background-color: rgba(16, 126, 60, 0.35);
       border: 1px solid #4ade80;
-      border-radius: 14px;
-      padding: 18px;
+      border-radius: 16px;
+      padding: 20px;
       margin-top: 20px;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       animation: bounceIn 0.5s;
     }
     .meaning { font-size: 18px; color: #86efac; font-weight: bold; margin-bottom: 8px; }
-    .success-title { font-size: 20px; color: #bbf7d0; font-weight: bold; margin-bottom: 6px; }
+    .success-title { font-size: 22px; color: #bbf7d0; font-weight: bold; margin-bottom: 6px; }
 
     .error-box {
       display: none;
-      background-color: rgba(127, 29, 29, 0.6);
+      background-color: rgba(153, 27, 27, 0.35);
       border: 1px solid #f87171;
-      border-radius: 14px;
-      padding: 18px;
+      border-radius: 16px;
+      padding: 20px;
       margin-top: 20px;
       color: #fca5a5;
       font-size: 17px;
       font-weight: bold;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
       animation: shake 0.4s;
     }
 
@@ -174,36 +188,33 @@
       background: linear-gradient(135deg, #22c55e, #16a34a);
       color: white;
       border: none;
-      padding: 16px 30px;
+      padding: 18px 30px;
       font-size: 18px;
       border-radius: 50px;
       cursor: pointer;
       transition: all 0.2s;
-      box-shadow: 0 8px 20px rgba(34,197,94,0.3);
-      font-weight: bold;
+      box-shadow: 0 10px 25px rgba(34,197,94,0.35);
+      font-weight: 700;
       width: 100%;
       margin-top: 10px;
     }
     .btn-mic:hover { transform: scale(1.02); filter: brightness(1.1); }
     .btn-mic.listening { background: linear-gradient(135deg, #ef4444, #dc2626); animation: pulse 1.5s infinite; }
 
-    .result-box { margin-top: 15px; font-size: 15px; color: rgba(255,255,255,0.7); min-height: 30px; }
+    .result-box { margin-top: 18px; font-size: 15px; color: rgba(255,255,255,0.7); min-height: 30px; }
 
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.03); } 100% { transform: scale(1); } }
     @keyframes bounceIn { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
-    /* Footer Styles */
+    /* Footer Styles (ลบลิงก์ Discover, Mission, Concierge ออกตามต้องการ) */
     footer {
       width: 100%;
-      max-width: 1200px;
-      margin-top: 80px;
+      max-width: 820px;
+      margin-top: 60px;
       border-radius: 2rem;
       padding: 2.5rem;
       color: rgba(255, 255, 255, 0.7);
-    }
-    @media(min-width: 768px) {
-      footer { padding: 3rem; margin-top: 120px; }
     }
   </style>
 </head>
@@ -218,7 +229,7 @@
   <!-- Content Wrapper -->
   <div class="content-wrapper">
     
-    <!-- ตัวแอปฝึกพูดภาษาจีน -->
+    <!-- ระบบฝึกพูดภาษาจีน (ดีไซน์ Liquid Glass) -->
     <div class="app-card">
       <h1>👩‍🏫 ระบบฝึกพูดภาษาจีน</h1>
       <div class="subtitle">พิมพ์ประโยค แล้วให้เด็กๆ อ่านออกเสียงผ่านไมค์</div>
@@ -230,7 +241,7 @@
       </div>
 
       <div class="target-box">
-        <div style="font-size: 13px; color: #38bdf8; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase;">ประโยคฝึกอ่านสำหรับนักเรียน:</div>
+        <div style="font-size: 12px; color: #38bdf8; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;">ประโยคฝึกอ่านสำหรับนักเรียน:</div>
         <div class="chinese" id="targetChineseDisplay">今天老师很好。</div>
       </div>
 
@@ -241,7 +252,7 @@
       <div class="reveal-box" id="revealBox">
         <div class="success-title">🎉 ยอดเยี่ยม! อ่านถูกต้องแล้ว! 🌟</div>
         <div class="meaning" id="targetMeaningDisplay">โจทย์: 今天老师很好。</div>
-        <button style="margin-top: 10px; background: #15803d; color: white; border: none; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-weight:500;" onclick="speakTarget()">🔊 ฟังเสียงเจ้าของภาษา</button>
+        <button style="margin-top: 12px; background: #15803d; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight:600;" onclick="speakTarget()">🔊 ฟังเสียงเจ้าของภาษา</button>
       </div>
 
       <div class="error-box" id="errorBox">
@@ -249,58 +260,21 @@
       </div>
     </div>
 
-    <!-- Liquid Glass Footer -->
+    <!-- Liquid Glass Footer (ลบเมนูด้านบนออก เหลือโลโก้และโซเชียล) -->
     <footer class="liquid-glass">
-      <div style="display: grid; grid-template-columns: 1fr; gap: 2.5rem;" class="footer-grid">
+      <div style="display: flex; flex-direction: column; gap: 2rem;">
         
-        <!-- Top Grid -->
-        <div style="display: grid; grid-template-columns: 1fr; gap: 2.5rem;" class="footer-inner-grid">
-          
-          <!-- Logo & Desc -->
-          <div style="grid-column: span 5;">
-            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256" fill="currentColor">
-                <path d="M 4.688 136 C 68.373 136 120 187.627 120 251.312 C 120 252.883 119.967 254.445 119.905 256 L 0 256 L 0 136.096 C 1.555 136.034 3.117 136 4.688 136 Z M 251.312 136 C 252.883 136 254.445 136.034 256 136.096 L 256 256 L 136.095 256 C 136.032 254.438 136.001 252.875 136 251.312 C 136 187.627 187.627 136 251.312 136 Z M 119.905 0 C 119.967 1.555 120 3.117 120 4.688 C 120 68.373 68.373 120 4.687 120 C 3.117 120 1.555 119.967 0 119.905 L 0 0 Z M 256 119.905 C 254.445 119.967 252.883 120 251.312 120 C 187.627 120 136 68.373 136 4.687 C 136 3.117 136.033 1.555 136.095 0 L 256 0 Z" />
-              </svg>
-              <span style="font-size: 1.25rem; font-weight: 500; color: #fff;">LUMINA</span>
-            </div>
-            <p style="font-size: 0.875rem; line-height: 1.6; max-width: 24rem; opacity: 0.7;">
-              Lumina provides premium clarity on global events and cosmic wonders - shared with all for free.
-            </p>
+        <!-- Top Row: Logo & Desc -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 256 256" fill="currentColor">
+              <path d="M 4.688 136 C 68.373 136 120 187.627 120 251.312 C 120 252.883 119.967 254.445 119.905 256 L 0 256 L 0 136.096 C 1.555 136.034 3.117 136 4.688 136 Z M 251.312 136 C 252.883 136 254.445 136.034 256 136.096 L 256 256 L 136.095 256 C 136.032 254.438 136.001 252.875 136 251.312 C 136 187.627 187.627 136 251.312 136 Z M 119.905 0 C 119.967 1.555 120 3.117 120 4.688 C 120 68.373 68.373 120 4.687 120 C 3.117 120 1.555 119.967 0 119.905 L 0 0 Z M 256 119.905 C 254.445 119.967 252.883 120 251.312 120 C 187.627 120 136 68.373 136 4.687 C 136 3.117 136.033 1.555 136.095 0 L 256 0 Z" />
+            </svg>
+            <span style="font-size: 1.25rem; font-weight: 500; color: #fff;">LUMINA</span>
           </div>
-
-          <!-- Links Sections (3 columns) -->
-          <div style="grid-column: span 7; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem;">
-            <div>
-              <h4 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #fff; font-weight: 500; margin-bottom: 1rem;">Discover</h4>
-              <ul style="list-style: none; font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; opacity: 0.8;">
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Labs & Workshops</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Deep Dive Series</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Global Circle</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Resource Vault</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Future Roadmap</li>
-              </ul>
-            </div>
-            <div>
-              <h4 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #fff; font-weight: 500; margin-bottom: 1rem;">The Mission</h4>
-              <ul style="list-style: none; font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; opacity: 0.8;">
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Origin Story</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">The Collective</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Newsroom Hub</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Join the Team</li>
-              </ul>
-            </div>
-            <div>
-              <h4 style="font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; color: #fff; font-weight: 500; margin-bottom: 1rem;">Concierge</h4>
-              <ul style="list-style: none; font-size: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; opacity: 0.8;">
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Get in Touch</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Legal Privacy</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">User Agreement</li>
-                <li style="cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color=''">Report Concern</li>
-              </ul>
-            </div>
-          </div>
-
+          <p style="font-size: 0.875rem; line-height: 1.6; max-width: 28rem; opacity: 0.7;">
+            Lumina provides premium clarity on global events and cosmic wonders - shared with all for free.
+          </p>
         </div>
 
         <!-- Bottom Bar -->
@@ -310,7 +284,6 @@
           <div style="display: flex; align-items: center; gap: 1rem;">
             <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; opacity: 0.5;">Join the Journey:</span>
             <div style="display: flex; gap: 1rem; align-items: center;">
-              <!-- Social Icons using SVG placeholders -->
               <a href="#" style="opacity: 0.7; transition: all 0.2s; color: inherit;" onmouseover="this.style.opacity='1'; this.style.color='#fff'" onmouseout="this.style.opacity='0.7'; this.style.color='inherit'">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
               </a>
@@ -337,13 +310,6 @@
 </main>
 
 <script>
-  // ปรับแก้ Responsive เล็กน้อยสำหรับ Grid ด้านบนของ Footer
-  if (window.innerWidth >= 768) {
-    document.querySelector('.footer-inner-grid').style.gridTemplateColumns = 'repeat(12, minmax(0, 1fr))';
-    document.querySelector('.footer-inner-grid').children[0].style.gridColumn = 'span 5';
-    document.querySelector('.footer-inner-grid').children[1].style.gridColumn = 'span 7';
-  }
-
   let targetSentence = "今天老师很好。";
   let isListening = false;
 
