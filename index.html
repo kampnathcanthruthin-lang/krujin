@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน</title>
+  <title>ระบบฝึกพูดภาษาจีน - ตรวจจับแม่นยำ</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -26,7 +26,7 @@
     h1 { color: #0284c7; font-size: 24px; margin-bottom: 5px; }
     .subtitle { color: #64748b; font-size: 14px; margin-bottom: 20px; }
     
-    /* กล่องสำหรับคุณครูกรอกเฉพาะประโยคจีน */
+    /* กล่องสำหรับคุณครูกรอกโจทย์และความหมาย */
     .teacher-box {
       background-color: #f8fafc;
       border: 2px solid #cbd5e1;
@@ -35,11 +35,11 @@
       margin-bottom: 20px;
       text-align: left;
     }
-    .teacher-box label { font-weight: bold; color: #334155; font-size: 14px; display: block; margin-bottom: 5px; }
+    .teacher-box label { font-weight: bold; color: #334155; font-size: 13px; display: block; margin-top: 8px; margin-bottom: 3px; }
     .teacher-box input {
       width: 100%;
-      padding: 10px;
-      font-size: 18px;
+      padding: 8px;
+      font-size: 16px;
       border: 1px solid #94a3b8;
       border-radius: 8px;
       box-sizing: border-box;
@@ -78,9 +78,22 @@
       margin-top: 15px;
       animation: bounceIn 0.5s;
     }
-    .pinyin { font-size: 20px; color: #166534; font-weight: bold; margin-bottom: 5px; }
-    .meaning { font-size: 18px; color: #15803d; }
+    .meaning { font-size: 18px; color: #15803d; font-weight: bold; margin-bottom: 5px; }
     .success-title { font-size: 22px; color: #15803d; font-weight: bold; margin-bottom: 8px; }
+
+    /* กล่องสีแดงแจ้งเตือนเมื่อพูดผิด */
+    .error-box {
+      display: none;
+      background-color: #fee2e2;
+      border: 2px solid #fca5a5;
+      border-radius: 14px;
+      padding: 15px;
+      margin-top: 15px;
+      color: #b91c1c;
+      font-size: 18px;
+      font-weight: bold;
+      animation: shake 0.4s;
+    }
 
     .btn-mic {
       background-color: #22c55e;
@@ -103,18 +116,23 @@
 
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
     @keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
   </style>
 </head>
 <body>
 
 <div class="container">
   <h1>👩‍🏫 ระบบฝึกพูดภาษาจีน</h1>
-  <div class="subtitle">พิมพ์ประโยค แล้วให้เด็กๆ อ่านออกเสียงผ่านไมค์</div>
+  <div class="subtitle">พิมพ์ประโยคและคำแปล แล้วให้เด็กๆ อ่านออกเสียง</div>
 
-  <!-- โซนกรอกประโยคของคุณครูแบบสะอาดตา -->
+  <!-- โซนกรอกประโยคและความหมายของคุณครู -->
   <div class="teacher-box">
-    <label>✏️ พิมพ์ประโยคภาษาจีนที่ต้องการ:</label>
+    <label>✏️ พิมพ์ประโยคภาษาจีน:</label>
     <input type="text" id="customChinese" value="今天老师很好。">
+    
+    <label>📖 พิมพ์คำแปลภาษาไทย:</label>
+    <input type="text" id="customMeaning" value="วันนี้คุณครูใจดีมาก">
+
     <button onclick="setCustomTarget()">ตั้งเป็นโจทย์ให้เด็กอ่าน</button>
   </div>
 
@@ -128,17 +146,22 @@
 
   <div class="result-box" id="resultText">กดปุ่มไมค์ แล้วอ่านออกเสียงตามตัวอักษรจีนด้านบนครับ</div>
   
-  <!-- กล่องสีเขียวเฉลย (ซ่อนไว้จนกว่าเด็กจะพูดถูก) -->
+  <!-- กล่องสีเขียวเฉลย (แสดงเมื่อพูดถูก) -->
   <div class="reveal-box" id="revealBox">
     <div class="success-title">🎉 ยอดเยี่ยม! อ่านถูกต้องแล้ว! 🌟</div>
-    <div class="pinyin" id="targetPinyinDisplay">Jīntiān lǎoshī hěn hǎo.</div>
     <div class="meaning" id="targetMeaningDisplay">ความหมาย: วันนี้คุณครูใจดีมาก</div>
     <button style="margin-top: 10px; background: #15803d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="speakTarget()">🔊 ฟังเสียงเจ้าของภาษา</button>
+  </div>
+
+  <!-- กล่องสีแดงแจ้งเตือน (แสดงเมื่อพูดผิดหรือพูดไม่ครบ) -->
+  <div class="error-box" id="errorBox">
+    ❌ อ่านออกเสียงยังไม่ถูกต้อง ลองใหม่อีกครั้ง!
   </div>
 </div>
 
 <script>
   let targetSentence = "今天老师很好。";
+  let targetMeaning = "วันนี้คุณครูใจดีมาก";
   let isListening = false;
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -154,16 +177,21 @@
       const spokenText = event.results[0][0].transcript;
       document.getElementById('resultText').innerHTML = `ระบบได้ยินเด็กพูด: <b style="color:#0284c7">"${spokenText}"</b>`;
       
-      const cleanTarget = targetSentence.replace(/[。！？，,.]/g, "").trim();
-      const cleanSpoken = spokenText.replace(/[。！？，,.]/g, "").trim();
+      // ทำความสะอาดข้อความ ตัดช่องว่างและเครื่องหมายวรรคตอนออกให้หมด
+      const cleanTarget = targetSentence.replace(/[\s。！？，,.;]/g, "").trim();
+      const cleanSpoken = spokenText.replace(/[\s。！？，,.;]/g, "").trim();
 
-      // ตรวจสอบความถูกต้อง
-      if (cleanSpoken.includes(cleanTarget) || cleanTarget.includes(cleanSpoken)) {
-        // ถ้าพูดถูก ให้แสดงกล่องสีเขียวเฉลย
+      // ตรวจสอบความถูกต้องแบบเข้มงวด (ต้องตรงกันเป๊ะ หรือมีความใกล้เคียงสูงมากเพื่อป้องกันการตกหล่น)
+      // ใช้เงื่อนไขให้ตัวอักษรที่พูดต้องครบถ้วนตามโจทย์ (Exact Match)
+      if (cleanSpoken === cleanTarget) {
+        // ถ้าพูดถูกต้องเป๊ะ
         document.getElementById('revealBox').style.display = 'block';
+        document.getElementById('errorBox').style.display = 'none';
         document.getElementById('resultText').innerText = '';
       } else {
+        // ถ้าพูดผิด หรือพูดไม่ครบ
         document.getElementById('revealBox').style.display = 'none';
+        document.getElementById('errorBox').style.display = 'block';
       }
     };
 
@@ -177,9 +205,10 @@
     alert("เบราว์เซอร์นี้ไม่รองรับการแปลงเสียงพูด แนะนำให้ใช้ Google Chrome ครับ");
   }
 
-  // ฟังก์ชันอัปเดตโจทย์ที่คุณครูกรอก (พร้อมระบบสกัดคำอ่านเทียบเคียงอัตโนมัติ)
+  // ฟังก์ชันอัปเดตโจทย์และความหมายที่คุณครูกรอก
   function setCustomTarget() {
     const cInput = document.getElementById('customChinese').value.trim();
+    const mInput = document.getElementById('customMeaning').value.trim();
 
     if (cInput === "") {
       alert("กรุณากรอกประโยคภาษาจีนครับ");
@@ -187,12 +216,14 @@
     }
 
     targetSentence = cInput;
+    targetMeaning = mInput !== "" ? mInput : "-";
+
     document.getElementById('targetChineseDisplay').innerText = targetSentence;
-    document.getElementById('targetPinyinDisplay').innerText = "โจทย์: " + targetSentence;
-    document.getElementById('targetMeaningDisplay').innerText = "เด็กๆ อ่านออกเสียงได้ยอดเยี่ยม!";
+    document.getElementById('targetMeaningDisplay').innerText = "ความหมาย: " + targetMeaning;
     
-    // ซ่อนกล่องสีเขียวเมื่อเปลี่ยนโจทย์ใหม่
+    // ซ่อนกล่องแจ้งเตือนทั้งหมดเมื่อเปลี่ยนโจทย์ใหม่
     document.getElementById('revealBox').style.display = 'none';
+    document.getElementById('errorBox').style.display = 'none';
     document.getElementById('resultText').innerText = 'เปลี่ยนโจทย์เรียบร้อย! ให้เด็กๆ ลองกดไมค์อ่านได้เลย';
   }
 
@@ -207,6 +238,7 @@
       btn.innerText = '🛑 กำลังฟังเสียง... พูดเลย!';
       btn.classList.add('listening');
       document.getElementById('revealBox').style.display = 'none';
+      document.getElementById('errorBox').style.display = 'none';
       document.getElementById('resultText').innerText = 'กำลังฟังเสียง...';
     } else {
       recognition.stop();
