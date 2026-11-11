@@ -138,7 +138,7 @@
     h1 { color: #fff; font-size: 26px; margin-bottom: 6px; font-weight: 600; letter-spacing: -0.01em; }
     .subtitle { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 28px; font-weight: 400; letter-spacing: 0.02em; }
 
-    /* ส่วนตั้งค่าของคุณครู (จะถูกซ่อนไว้จนกว่าจะใส่รหัสผ่านถูกต้อง) */
+    /* ส่วนตั้งค่าของคุณครู (ซ่อนไว้จนกว่าจะใส่รหัสผ่านถูกต้อง) */
     .teacher-box {
       display: none;
       background: rgba(255, 255, 255, 0.02);
@@ -293,7 +293,7 @@
       <h1>ระบบฝึกพูดภาษาจีน</h1>
       <div class="subtitle">ฝึกทักษะการออกเสียงภาษาจีนสำหรับนักเรียน</div>
 
-      <!-- แผงตั้งค่าโจทย์ (ซ่อนไว้สำหรับคุณครูใส่รหัสผ่าน) -->
+      <!-- แผงตั้งค่าโจทย์ (รหัสผ่านคือ 123) -->
       <div class="teacher-box" id="teacherBox">
         <label>🛠️ ตั้งค่าโจทย์ใหม่ (เฉพาะคุณครู)</label>
         <input type="text" id="customChinese" value="今天老师很好。" placeholder="พิมพ์ประโยคภาษาจีน...">
@@ -344,11 +344,11 @@
   let totalScore = 0;
   let hasScoredForCurrent = false;
 
-  // รหัสผ่านสำหรับคุณครู (สามารถเปลี่ยนตัวเลขด้านล่างนี้ได้ตามต้องการครับ เช่น '9999' หรือ 'admin')
-  const TEACHER_PASSWORD = "1234";
+  // ตั้งรหัสผ่านคุณครูเป็น 123 ตามที่ขอ
+  const TEACHER_PASSWORD = "123";
 
   function toggleTeacherMode() {
-    const password = prompt("กรุณากรอกรหัสผ่านสำหรับคุณครู:");
+    const password = prompt("กรุณากรอกรหัสผ่านสำหรับคุณครู (PIN: 123):");
     if (password === TEACHER_PASSWORD) {
       const teacherBox = document.getElementById('teacherBox');
       if (teacherBox.style.display === 'block') {
@@ -356,7 +356,7 @@
         alert("ออกจากโหมดคุณครูแล้ว");
       } else {
         teacherBox.style.display = 'block';
-        alert("เข้าสู่โหมดคุณครูสำเร็จ! คุณสามารถเปลี่ยนโจทย์ได้ที่นี่");
+        alert("เข้าสู่โหมดคุณครูสำเร็จ!");
       }
     } else if (password !== null) {
       alert("รหัสผ่านไม่ถูกต้อง!");
@@ -468,7 +468,6 @@
     document.getElementById('errorBox').style.display = 'none';
     document.getElementById('resultText').innerText = 'อัปเดตโจทย์เรียบร้อย พร้อมสำหรับฝึกอ่าน';
     
-    // ซ่อนกล่องคุณครูอัตโนมัติเมื่อเปลี่ยนโจทย์เสร็จ เพื่อให้นักเรียนใช้งานต่อได้ทันที
     document.getElementById('teacherBox').style.display = 'none';
   }
 
