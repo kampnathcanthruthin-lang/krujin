@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Preset Lessons</title>
+  <title>ระบบฝึกพูดภาษาจีน - Teacher Mode</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -71,6 +71,7 @@
       flex: 1;
     }
 
+    /* ส่วนหัวมุมบนสำหรับปุ่มคุณครู */
     .top-bar {
       width: 100%;
       display: flex;
@@ -91,6 +92,7 @@
     }
     .btn-teacher-login:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
 
+    /* คะแนนดาวสะสม */
     .score-badge {
       display: flex;
       align-items: center;
@@ -106,6 +108,7 @@
       letter-spacing: 0.05em;
     }
 
+    /* การ์ดหลัก */
     .app-card {
       background: rgba(15, 15, 20, 0.5);
       backdrop-filter: blur(24px);
@@ -135,7 +138,7 @@
     h1 { color: #fff; font-size: 26px; margin-bottom: 6px; font-weight: 600; letter-spacing: -0.01em; }
     .subtitle { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 28px; font-weight: 400; letter-spacing: 0.02em; }
 
-    /* แผงควบคุมของคุณครู (เปิดด้วย PIN 123) */
+    /* ส่วนตั้งค่าของคุณครู (ซ่อนไว้จนกว่าจะใส่รหัสผ่านถูกต้อง) */
     .teacher-box {
       display: none;
       background: rgba(255, 255, 255, 0.02);
@@ -176,27 +179,6 @@
       transition: all 0.2s;
     }
     .teacher-box button:hover { background: #22c55e; transform: translateY(-1px); }
-
-    /* ปุ่มเลือกบทเรียนสำเร็จรูปสำหรับคุณครู */
-    .preset-lessons {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 10px;
-      margin-top: 15px;
-    }
-    .btn-preset {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-    .btn-preset:hover { background: rgba(255, 255, 255, 0.2); }
 
     .target-box {
       background: rgba(255, 255, 255, 0.02);
@@ -257,6 +239,7 @@
     @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     @keyframes fadeIn { 0% { opacity: 0; transform: translateY(4px); } 100% { opacity: 1; transform: translateY(0); } }
 
+    /* ละอองดาวเฉลิมฉลอง */
     .confetti-particle {
       position: fixed;
       width: 10px;
@@ -285,39 +268,36 @@
 <body>
 
 <main>
+  <!-- Background Video -->
   <video autoplay muted loop playsinline>
     <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260429_114316_1c7889ad-2885-410e-b493-98119fee0ddb.mp4" type="video/mp4">
   </video>
 
+  <!-- Content Wrapper -->
   <div class="content-wrapper">
     
+    <!-- ปุ่มล็อกอินสำหรับคุณครู -->
     <div class="top-bar">
       <button class="btn-teacher-login" onclick="toggleTeacherMode()">⚙️ โหมดคุณครู</button>
     </div>
 
+    <!-- คะแนนดาวสะสม -->
     <div class="score-badge">
       <span>⭐ คะแนนสะสม:</span>
       <span id="scoreCount" style="color: #fbbf24; font-weight: 700; font-size: 15px;">0</span>
       <span>ดาว</span>
     </div>
 
+    <!-- ระบบฝึกพูดภาษาจีน -->
     <div class="app-card">
       <h1>ระบบฝึกพูดภาษาจีน</h1>
       <div class="subtitle">ฝึกทักษะการออกเสียงภาษาจีนสำหรับนักเรียน</div>
 
-      <!-- แผงตั้งค่าและคลังบทเรียนสำเร็จรูปสำหรับคุณครู (PIN: 123) -->
+      <!-- แผงตั้งค่าโจทย์ (รหัสผ่านคือ 123) -->
       <div class="teacher-box" id="teacherBox">
         <label>🛠️ ตั้งค่าโจทย์ใหม่ (เฉพาะคุณครู)</label>
         <input type="text" id="customChinese" value="今天老师很好。" placeholder="พิมพ์ประโยคภาษาจีน...">
         <button onclick="setCustomTarget()">บันทึกและเปลี่ยนโจทย์</button>
-
-        <label style="margin-top: 18px;">📚 คลังบทเรียนสำเร็จรูป (คลิกเลือกเพื่อเปลี่ยนทันที)</label>
-        <div class="preset-lessons">
-          <button class="btn-preset" onclick="selectPreset('你好！')">บทที่ 1: สวัสดี</button>
-          <button class="btn-preset" onclick="selectPreset('你叫什么名字？')">บทที่ 2: คุณชื่ออะไร</button>
-          <button class="btn-preset" onclick="selectPreset('今天老师很好。')">บทที่ 3: คุณครูใจดีมาก</button>
-          <button class="btn-preset" onclick="selectPreset('我 们 一 起 学 中 文。')">บทที่ 4: เรียนภาษาจีน</button>
-        </div>
       </div>
 
       <div class="target-box">
@@ -340,6 +320,7 @@
       </div>
     </div>
 
+    <!-- Liquid Glass Footer -->
     <footer class="liquid-glass">
       <div style="display: flex; flex-direction: column; gap: 1rem;">
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -363,6 +344,7 @@
   let totalScore = 0;
   let hasScoredForCurrent = false;
 
+  // ตั้งรหัสผ่านคุณครูเป็น 123 ตามที่ขอ
   const TEACHER_PASSWORD = "123";
 
   function toggleTeacherMode() {
@@ -379,21 +361,6 @@
     } else if (password !== null) {
       alert("รหัสผ่านไม่ถูกต้อง!");
     }
-  }
-
-  // ฟังก์ชันเลือกบทเรียนสำเร็จรูปจากคลัง
-  function selectPreset(sentence) {
-    targetSentence = sentence;
-    hasScoredForCurrent = false;
-    document.getElementById('customChinese').value = sentence;
-    document.getElementById('targetChineseDisplay').innerText = targetSentence;
-    document.getElementById('targetMeaningDisplay').innerText = "โจทย์: " + targetSentence;
-    
-    document.getElementById('revealBox').style.display = 'none';
-    document.getElementById('errorBox').style.display = 'none';
-    document.getElementById('resultText').innerText = 'เปลี่ยนบทเรียนเรียบร้อย พร้อมสำหรับฝึกอ่าน';
-    
-    document.getElementById('teacherBox').style.display = 'none';
   }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
