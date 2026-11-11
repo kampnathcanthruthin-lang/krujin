@@ -1,247 +1,710 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน</title>
+  <title>Redline — Mars Trips</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;800;900&display=swap" rel="stylesheet">
+  
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js"
+      }
+    }
+  </script>
+
   <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #e0f2fe, #f0fdf4);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    .container {
-      background: white;
-      padding: 35px;
-      border-radius: 24px;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.1);
-      text-align: center;
-      max-width: 520px;
-      width: 90%;
-    }
-    h1 { color: #0284c7; font-size: 24px; margin-bottom: 5px; }
-    .subtitle { color: #64748b; font-size: 14px; margin-bottom: 20px; }
-    
-    /* กล่องสำหรับคุณครูกรอกเฉพาะประโยคจีน */
-    .teacher-box {
-      background-color: #f8fafc;
-      border: 2px solid #cbd5e1;
-      border-radius: 14px;
-      padding: 15px;
-      margin-bottom: 20px;
-      text-align: left;
-    }
-    .teacher-box label { font-weight: bold; color: #334155; font-size: 14px; display: block; margin-bottom: 5px; }
-    .teacher-box input {
-      width: 100%;
-      padding: 10px;
-      font-size: 18px;
-      border: 1px solid #94a3b8;
-      border-radius: 8px;
-      box-sizing: border-box;
-    }
-    .teacher-box button {
-      margin-top: 12px;
-      background-color: #0284c7;
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-      width: 100%;
-      font-size: 16px;
-    }
-    .teacher-box button:hover { background-color: #0369a1; }
+    :root{--red:#e8283c;--deep:#2a0d04}
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;overflow:hidden;background:var(--deep);color:#fff;font-family:Montserrat,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+    .hero{position:fixed;inset:0;overflow:hidden;background:radial-gradient(58% 72% at 50% 47%,#d0591f 0%,#a23f12 32%,#6b2409 62%,#3b1405 100%)}
+    .hero>*{position:absolute}
 
-    /* กล่องโจทย์ให้เด็กอ่าน */
-    .target-box {
-      background-color: #e0f2fe;
-      border: 3px dashed #0284c7;
-      border-radius: 18px;
-      padding: 20px;
-      margin: 15px 0;
+    #word0{left:50%;top:50%;font-weight:900;font-size:min(27vw,50vh);line-height:.8;letter-spacing:-.035em;white-space:nowrap;z-index:2;will-change:transform,clip-path}
+    #eyebrow{left:50%;top:50%;z-index:3;font-weight:300;font-size:clamp(14px,1.45vw,23px);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+    #gl{inset:0;width:100%;height:100%;z-index:4;cursor:grab;touch-action:none}
+    #gl.drag{cursor:grabbing}
+    #dust{inset:0;width:100%;height:100%;z-index:5;pointer-events:none}
+    #flare{z-index:1;width:44vmin;height:44vmin;margin:-22vmin;border-radius:50%;pointer-events:none;background:radial-gradient(closest-side,rgba(255,236,205,.95),rgba(255,176,96,.42) 26%,rgba(255,140,60,.1) 58%,transparent)}
+
+    #pin{z-index:6;left:0;top:0;display:flex;align-items:center;gap:9px;font-weight:600;font-size:11px;letter-spacing:.16em;text-transform:uppercase;pointer-events:none;white-space:nowrap;opacity:0}
+    #pin i{width:12px;height:12px;border-radius:50%;background:#fff;position:relative;box-shadow:0 0 0 4px rgba(232,40,60,.75)}
+    #pin i::after{content:"";position:absolute;inset:-13px;border-radius:50%;border:1px solid #fff;animation:pulse 2s ease-out infinite}
+    @keyframes pulse{from{transform:scale(.4);opacity:1}to{transform:scale(1.4);opacity:0}}
+
+    #word1{left:50%;top:0;z-index:6;font-weight:800;font-size:min(9.4vw,19vh);letter-spacing:-.02em;line-height:1;color:rgba(255,255,255,.74);pointer-events:none;white-space:nowrap;opacity:0}
+
+    #sites{right:6.2%;top:50%;z-index:7;list-style:none;display:grid;gap:clamp(30px,6.6vh,62px);transform:translateY(-50%);opacity:0;pointer-events:none}
+    #sites::before{content:"";position:absolute;right:5px;top:6px;bottom:6px;width:1px;background:rgba(255,255,255,.5)}
+    #sites li{position:relative;text-align:right;padding-right:30px;cursor:pointer;font-weight:500;font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;transition:font-size .3s}
+    #sites li::after{content:"";position:absolute;right:1px;top:50%;width:9px;height:9px;margin-top:-5px;border-radius:50%;background:#fff;transition:transform .3s,box-shadow .3s}
+    #sites li.on{font-size:15px}
+    #sites li.on::after{transform:scale(1.5);box-shadow:0 0 0 7px rgba(255,255,255,.28)}
+    #card{right:calc(6.2% + 196px);top:0;z-index:7;width:clamp(170px,15.5vw,250px);aspect-ratio:1.42;background-repeat:no-repeat;border-radius:3px;box-shadow:0 22px 44px rgba(20,4,0,.45);overflow:visible;opacity:0;pointer-events:none}
+    #card a{position:absolute;left:-26px;bottom:18%;background:var(--red);font-weight:600;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;padding:9px 15px;border-radius:2px;box-shadow:0 8px 18px rgba(120,10,20,.45)}
+
+    #region{left:50%;top:50%;z-index:7;transform:translate(-50%,-50%);font-weight:500;font-size:clamp(26px,3.4vw,54px);letter-spacing:.04em;pointer-events:none;opacity:0}
+
+    #land,#fore{inset:0;background-size:cover;background-repeat:no-repeat}
+    #land{z-index:8;background-position:50% 60%;will-change:transform;opacity:0}
+    #dest{left:0;right:0;top:0;z-index:9;text-align:center;pointer-events:none;opacity:0}
+    #dest small{display:block;font-weight:300;font-size:min(5.2vw,11vh);line-height:1;letter-spacing:.04em;text-transform:uppercase;opacity:.92}
+    #dest b{display:block;margin-top:.04em;font-weight:900;font-size:min(9.2vw,19vh);line-height:1;letter-spacing:-.03em;text-transform:uppercase;white-space:nowrap;color:#fff4e6}
+    #fore{z-index:10;background-position:50% 100%;will-change:transform;opacity:0}
+    #fog{inset:0;z-index:11;pointer-events:none;background:radial-gradient(70% 64% at 50% 46%,#fbe6cd 0%,#f6d3ae 52%,#b36a37 100%);opacity:0}
+
+    #scrim{left:0;right:0;top:0;height:150px;z-index:13;pointer-events:none;background:linear-gradient(rgba(44,14,3,.62),rgba(44,14,3,0));opacity:0}
+    #bar{left:50%;bottom:7.5vh;z-index:12;width:min(86vw,920px);display:grid;grid-template-columns:1fr 1fr 1fr 68px;background:#fff;color:#2b1a12;border-radius:3px;box-shadow:0 24px 60px rgba(30,6,0,.5);opacity:0;transform:translate(-50%,34px);pointer-events:none}
+    #bar div{padding:15px 22px;border-right:1px solid #eadfd6}
+    #bar label{display:block;font-weight:500;font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:#9a877b}
+    #bar input{width:100%;margin-top:5px;border:0;outline:0;font:600 15px Montserrat,sans-serif;color:#2b1a12;background:none}
+    #bar button{background:var(--red);color:#fff;border-radius:0 3px 3px 0;font-size:22px;transition:background .25s}
+    #bar button:hover{background:#c41426}
+
+    /* chrome */
+    header{left:0;right:0;top:0;z-index:20;display:flex;align-items:center;padding:clamp(18px,3.2vh,30px) clamp(20px,2.6vw,42px);font-size:11.5px;font-weight:500;letter-spacing:.05em;text-transform:uppercase;pointer-events:none}
+    header>*{pointer-events:auto}
+    .logo{display:flex;align-items:center;gap:12px;margin-right:auto;font-weight:800;font-size:19px;letter-spacing:-.01em;text-transform:none}
+    .logo svg{width:34px;height:30px}
+    header a{margin-left:clamp(16px,2.6vw,38px);opacity:.92;transition:opacity .2s}
+    header a:hover{opacity:1}
+    .ico{width:42px;height:42px;margin-left:clamp(14px,2.4vw,36px);border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.2);transition:background .25s}
+    .ico:hover{background:rgba(255,255,255,.34)}
+    .ico svg,.srch svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round}
+    .srch{margin-left:clamp(16px,2.6vw,38px)}
+    #rail{left:clamp(20px,2.6vw,42px);top:50%;z-index:20;display:grid;gap:15px;transform:translateY(-50%)}
+    #rail button{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.45);transition:background .3s,transform .3s}
+    #rail button.on{background:#fff;transform:scale(1.35)}
+    #hint{left:50%;bottom:4.4vh;transform:translateX(-50%);z-index:7;font-weight:400;font-size:11px;letter-spacing:.17em;text-transform:uppercase;opacity:.8;white-space:nowrap;pointer-events:none}
+
+    @media (max-width:760px){
+      header a{display:none}
+      #word0{font-size:29vw}
+      #eyebrow{font-size:12px}
+      #word1{font-size:15vw}
+      #sites{right:18px;top:auto;bottom:11vh;transform:none;gap:22px}
+      #card{right:auto;left:18px;top:auto!important;bottom:11vh;width:42vw}
+      #card a{left:8px;bottom:8px}
+      #dest b{font-size:11vw}#dest small{font-size:7vw}
+      #bar{grid-template-columns:1fr 1fr;width:calc(100vw - 32px);bottom:4vh}
+      #bar div:nth-child(2){border-right:0}
+      #bar div{padding:11px 14px;border-bottom:1px solid #eadfd6}
+      #bar button{height:46px;border-radius:0 0 3px 0}
+      #hint,#rail{display:none}
+      #fore{background-size:210% auto}
     }
-    .chinese { font-size: 42px; color: #0f172a; margin: 5px 0; font-weight: bold; word-break: break-all; }
-
-    /* กล่องสีเขียวเฉลย (แสดงเมื่อพูดถูก) */
-    .reveal-box {
-      display: none;
-      background-color: #dcfce7;
-      border: 2px solid #86efac;
-      border-radius: 14px;
-      padding: 15px;
-      margin-top: 15px;
-      animation: bounceIn 0.5s;
-    }
-    .meaning { font-size: 18px; color: #15803d; font-weight: bold; margin-bottom: 5px; }
-    .success-title { font-size: 22px; color: #15803d; font-weight: bold; margin-bottom: 8px; }
-
-    /* กล่องสีแดงแจ้งเตือนเมื่อพูดผิด */
-    .error-box {
-      display: none;
-      background-color: #fee2e2;
-      border: 2px solid #fca5a5;
-      border-radius: 14px;
-      padding: 15px;
-      margin-top: 15px;
-      color: #b91c1c;
-      font-size: 18px;
-      font-weight: bold;
-      animation: shake 0.4s;
-    }
-
-    .btn-mic {
-      background-color: #22c55e;
-      color: white;
-      border: none;
-      padding: 16px 30px;
-      font-size: 20px;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 4px 10px rgba(34,197,94,0.3);
-      font-weight: bold;
-      width: 100%;
-      margin-top: 10px;
-    }
-    .btn-mic:hover { background-color: #16a34a; transform: scale(1.02); }
-    .btn-mic.listening { background-color: #ef4444; animation: pulse 1.5s infinite; }
-
-    .result-box { margin-top: 15px; font-size: 16px; color: #334155; min-height: 30px; }
-
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
-    @keyframes bounceIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>👩‍🏫 ระบบฝึกพูดภาษาจีน</h1>
-  <div class="subtitle">พิมพ์ประโยค แล้วให้เด็กๆ อ่านออกเสียงผ่านไมค์</div>
+<main class="hero" id="hero">
+  <div id="word0">MARS</div>
+  <div id="eyebrow">Book your seat to</div>
+  <div id="flare"></div>
+  <canvas id="gl"></canvas>
+  <canvas id="dust"></canvas>
+  <div id="pin"><i></i><span>Tharsis</span></div>
+  <div id="word1">THARSIS</div>
+  <ul id="sites"></ul>
+  <div id="card"><a href="#" id="explore">Explore</a></div>
+  <div id="region">THARSIS</div>
+  <div id="land"></div>
+  <div id="dest"><small>Tharsis</small><b id="destName">Olympus Mons</b></div>
+  <div id="fore"></div>
+  <div id="fog"></div>
+  <div id="scrim"></div>
+  <form id="bar" onsubmit="return false">
+    <div><label for="d1">Depart Earth</label><input id="d1" value="12 Mar 2041"></div>
+    <div><label for="d2">Return</label><input id="d2" value="30 Sep 2042"></div>
+    <div><label for="d3">Passengers</label><input id="d3" value="2 adults"></div>
+    <button aria-label="Search seats">→</button>
+  </form>
+  <header>
+    <a class="logo" href="#" id="home" style="margin-left:0;opacity:1">
+      <svg viewBox="0 0 34 30" fill="none" stroke="#fff" stroke-linecap="round">
+        <path stroke-width="3.2" d="M3 27C5 13 15 4 31 3"/>
+        <path stroke-width="2" d="M11 27c1.500-8 8-14 18-15"/>
+        <circle cx="30" cy="20" r="3.500" fill="#fff" stroke="none"/>
+      </svg>Redline
+    </a>
+    <a href="#">Login</a><a href="#">Sign up</a>
+    <span class="srch"><svg viewBox="0 0 24 24"><circle cx="10.500" cy="10.500" r="6.500"/><path d="m15.500 15.500 5 5"/></svg></span>
+    <button class="ico" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M5 8h14M7 12h10M5 16h14"/></svg></button>
+  </header>
+  <div id="rail"><button aria-label="Mars"></button><button aria-label="Tharsis"></button><button aria-label="Destination"></button></div>
+  <div id="hint">Drag to spin · click the planet to land</div>
+</main>
 
-  <!-- โซนกรอกประโยคภาษาจีนของคุณครู (ลบช่องคำแปลออกแล้ว) -->
-  <div class="teacher-box">
-    <label>✏️ พิมพ์ประโยคภาษาจีนที่ต้องการ:</label>
-    <input type="text" id="customChinese" value="今天老师很好。">
-    <button onclick="setCustomTarget()">ตั้งเป็นโจทย์ให้เด็กอ่าน</button>
-  </div>
+<script type="module">
+  import * as THREE from 'three';
 
-  <!-- โซนโจทย์ตัวอักษรจีนให้เด็กอ่าน -->
-  <div class="target-box">
-    <div style="font-size: 14px; color: #0369a1; font-weight: bold;">ประโยคฝึกอ่านสำหรับนักเรียน:</div>
-    <div class="chinese" id="targetChineseDisplay">今天老师很好。</div>
-  </div>
+  // 1. Assets
+  const P = 'https://images.higgs.ai/?default=1&output=webp&url=https%3A%2F%2Fd8j0ntlcm91z4.cloudfront.net%2Fuser_38xzZboKViGWJOttwIXH07lWA1P%2Fhf_';
+  const MAP = P + '20261031_030432_a1948696-c1d5-4468-845e-7d1291f80943.png&w=2688&q=92';
+  const LAND = P + '20261031_030420_da39d0cf-af67-4e33-a487-6469549cfbff.png&w=2400&q=88';
+  const FORE = P + '20261031_030420_fe406b69-3e6f-4b7c-a17e-ef09db0d270b.png&w=2400&q=88';
+  const CARDS = P + '20261031_030420_e222aa05-c121-4f31-a466-0321badc0e28.png&w=1400&q=85';
 
-  <button class="btn-mic" id="micBtn" onclick="toggleListening()">🎤 กดเพื่อเริ่มพูด</button>
+  document.getElementById('land').style.backgroundImage = `url(${LAND})`;
+  document.getElementById('fore').style.backgroundImage = `url(${FORE})`;
+  document.getElementById('card').style.backgroundImage = `url(${CARDS})`;
 
-  <div class="result-box" id="resultText">กดปุ่มไมค์ แล้วอ่านออกเสียงตามตัวอักษรจีนด้านบนครับ</div>
+  const SHEET = {w: 2336, h: 1744};
+  const SITES = [
+    {name: 'Olympus Mons', u: .121, v: .31, box: [0, 0, 1150, 810]},
+    {name: 'Valles Marineris', u: .45, v: .56, box: [1186, 0, 1150, 810]},
+    {name: 'Gale Crater', u: .85, v: .75, box: [0, 900, 1150, 810]},
+    {name: 'Jezero Delta', u: .61, v: .35, box: [1186, 900, 1150, 810]}
+  ];
+  const THARSIS = {u: .15, v: .41};
+
+  function getDir(u, v) {
+    const ph = 2 * Math.PI * u;
+    const th = Math.PI * v;
+    return new THREE.Vector3(-Math.cos(ph) * Math.sin(th), Math.cos(th), Math.sin(ph) * Math.sin(th));
+  }
+
+  function getFaceRot(d) {
+    return {
+      yaw: Math.atan2(-d.x, d.z),
+      lat: Math.asin(d.y)
+    };
+  }
+
+  // 2. DOM Elements
+  const glCanvas = document.getElementById('gl');
+  const dustCanvas = document.getElementById('dust');
+  const sitesUl = document.getElementById('sites');
+  const cardEl = document.getElementById('card');
+  const destNameEl = document.getElementById('destName');
+  const pinEl = document.getElementById('pin');
+  const word0El = document.getElementById('word0');
+  const eyebrowEl = document.getElementById('eyebrow');
+  const flareEl = document.getElementById('flare');
+  const word1El = document.getElementById('word1');
+  const regionEl = document.getElementById('region');
+  const landEl = document.getElementById('land');
+  const foreEl = document.getElementById('fore');
+  const destEl = document.getElementById('dest');
+  const fogEl = document.getElementById('fog');
+  const scrimEl = document.getElementById('scrim');
+  const barEl = document.getElementById('bar');
+  const hintEl = document.getElementById('hint');
+  const railBtns = document.querySelectorAll('#rail button');
+
+  let activeSiteIdx = 0;
+
+  SITES.forEach((site, i) => {
+    const li = document.createElement('li');
+    li.innerText = site.name;
+    li.dataset.i = i;
+    li.addEventListener('mouseenter', () => pick(i));
+    li.addEventListener('click', () => { pick(i); go(2); });
+    sitesUl.appendChild(li);
+  });
+
+  function pick(i) {
+    activeSiteIdx = i;
+    const lis = sitesUl.querySelectorAll('li');
+    lis.forEach((li, idx) => li.classList.toggle('on', idx === i));
+    
+    const site = SITES[i];
+    destNameEl.innerText = site.name;
+
+    const [bx, by, bw, bh] = site.box;
+    const bgW = (SHEET.w / bw) * 100;
+    const bgH = (SHEET.h / bh) * 100;
+    const posX = (bx / (SHEET.w - bw)) * 100;
+    const posY = (by / (SHEET.h - bh)) * 100;
+
+    cardEl.style.backgroundSize = `${bgW}% ${bgH}%`;
+    cardEl.style.backgroundPosition = `${posX}% ${posY}%`;
+
+    const activeLi = lis[i];
+    if (activeLi) {
+      const rect = activeLi.getBoundingClientRect();
+      const topPos = rect.top + rect.height / 2 - cardEl.offsetHeight / 2;
+      cardEl.style.top = `${topPos}px`;
+    }
+  }
+
+  // 3. Three.js Scene Setup
+  const renderer = new THREE.WebGLRenderer({ canvas: glCanvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -2e5, 2e5);
+  const scene = new THREE.Scene();
+
+  const planetGroup = new THREE.Group();
+  const tiltGroup = new THREE.Group();
+  const spinGroup = new THREE.Group();
+
+  scene.add(planetGroup);
+  planetGroup.add(tiltGroup);
+  tiltGroup.add(spinGroup);
+
+  // Material & Shader
+  const sphereGeo = new THREE.SphereGeometry(1, 128, 96);
   
-  <!-- กล่องสีเขียวเฉลย (แสดงเมื่อพูดถูก) -->
-  <div class="reveal-box" id="revealBox">
-    <div class="success-title">🎉 ยอดเยี่ยม! อ่านถูกต้องแล้ว! 🌟</div>
-    <div class="meaning" id="targetMeaningDisplay">โจทย์: 今天老师很好。</div>
-    <button style="margin-top: 10px; background: #15803d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;" onclick="speakTarget()">🔊 ฟังเสียงเจ้าของภาษา</button>
-  </div>
-
-  <!-- กล่องสีแดงแจ้งเตือน (แสดงเมื่อพูดผิดหรือพูดไม่ครบ) -->
-  <div class="error-box" id="errorBox">
-    ❌ อ่านออกเสียงยังไม่ถูกต้อง ลองใหม่อีกครั้ง!
-  </div>
-</div>
-
-<script>
-  let targetSentence = "今天老师很好。";
-  let isListening = false;
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let recognition;
-
-  if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.lang = 'zh-CN';
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onresult = function(event) {
-      const spokenText = event.results[0][0].transcript;
-      document.getElementById('resultText').innerHTML = `ระบบได้ยินเด็กพูด: <b style="color:#0284c7">"${spokenText}"</b>`;
-      
-      // ทำความสะอาดข้อความ ตัดช่องว่างและเครื่องหมายวรรคตอนออก
-      const cleanTarget = targetSentence.replace(/[\s。！？，,.;]/g, "").trim();
-      const cleanSpoken = spokenText.replace(/[\s。！？，,.;]/g, "").trim();
-
-      // ตรวจสอบความถูกต้องแบบเข้มงวด (ต้องออกเสียงตรงกันเป๊ะตามโจทย์)
-      if (cleanSpoken === cleanTarget) {
-        // ถ้าพูดถูก
-        document.getElementById('revealBox').style.display = 'block';
-        document.getElementById('errorBox').style.display = 'none';
-        document.getElementById('resultText').innerText = '';
-      } else {
-        // ถ้าพูดผิด หรือพูดไม่ครบ
-        document.getElementById('revealBox').style.display = 'none';
-        document.getElementById('errorBox').style.display = 'block';
+  const marsMaterial = new THREE.ShaderMaterial({
+    uniforms: {
+      map: { value: null },
+      ready: { value: 0.0 },
+      texel: { value: new THREE.Vector2(1 / 2688, 1 / 1344) },
+      sun: { value: new THREE.Vector3(0.62, 0.5, 0.6).normalize() },
+      hiDir: { value: getDir(THARSIS.u, THARSIS.v) },
+      hi: { value: 0.0 },
+      hiR: { value: 0.62 }
+    },
+    vertexShader: `
+      varying vec2 vUv;
+      varying vec3 vObj;
+      varying vec3 vN;
+      void main(){
+        vUv = uv;
+        vObj = normalize(position);
+        vN = normalize(mat3(modelMatrix) * normal);
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.);
       }
-    };
+    `,
+    fragmentShader: `
+      uniform sampler2D map;
+      uniform vec2 texel;
+      uniform vec3 sun, hiDir;
+      uniform float hi, hiR, ready;
+      varying vec2 vUv;
+      varying vec3 vObj;
+      varying vec3 vN;
+      
+      float luma(vec2 u){ return dot(texture2D(map, u).rgb, vec3(.3,.6,.1)); }
+      
+      void main(){
+        vec3 col = texture2D(map, vUv).rgb;
+        col = pow(col, vec3(2.6)) * vec3(1.18,.74,.56);
+        
+        vec3 n = normalize(vN);
+        vec3 t = normalize(cross(vec3(0.,1.,0.), n)), b = cross(n, t);
+        float dx = luma(vUv + vec2(texel.x*2.,0.)) - luma(vUv - vec2(texel.x*2.,0.));
+        float dy = luma(vUv + vec2(0.,texel.y*2.)) - luma(vUv - vec2(0.,texel.y*2.));
+        n = normalize(n - (t*dx + b*dy) * 1.9);
+        
+        float diff = max(dot(n, sun), 0.);
+        vec3 lit = col * (vec3(1.5,1.32,1.18) * pow(diff, .85) + vec3(.2,.09,.06));
+        
+        float d = acos(clamp(dot(normalize(vObj), hiDir), -1., 1.)) + (luma(vUv) - .45) * .22;
+        float m = smoothstep(hiR, hiR - .03, d), edge = smoothstep(.03, .0, abs(d - hiR + .01));
+        lit = mix(lit, mix(lit, vec3(.62,.012,.07) * (.25 + diff * 1.05) * (.5 + luma(vUv) * 1.1), .9), m * hi) + vec3(1.,.42,.4) * edge * hi * .22;
+        
+        float fres = pow(1. - max(vN.z, 0.), 3.2);
+        lit += vec3(1.,.5,.26) * fres * (.05 + diff * .5);
+        lit = lit / (lit * .3 + 1.) * 1.3;
+        gl_FragColor = vec4(pow(lit, vec3(1./2.2)), 1.) * ready;
+      }
+    `
+  });
 
-    recognition.onend = function() {
-      isListening = false;
-      const btn = document.getElementById('micBtn');
-      btn.innerText = '🎤 กดเพื่อเริ่มพูด';
-      btn.classList.remove('listening');
-    };
-  } else {
-    alert("เบราว์เซอร์นี้ไม่รองรับการแปลงเสียงพูด แนะนำให้ใช้ Google Chrome ครับ");
+  const marsMesh = new THREE.Mesh(sphereGeo, marsMaterial);
+  spinGroup.add(marsMesh);
+
+  // Atmosphere
+  const atmosGeo = new THREE.SphereGeometry(1.14, 64, 48);
+  const atmosMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    blending: THREE.AdditiveBlending,
+    transparent: true,
+    depthWrite: false,
+    uniforms: {
+      sun: { value: new THREE.Vector3(0.62, 0.5, 0.6).normalize() },
+      ready: { value: 0.0 }
+    },
+    vertexShader: `
+      varying vec3 vN;
+      void main(){ vN = normalize(mat3(modelMatrix)*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }
+    `,
+    fragmentShader: `
+      uniform vec3 sun; uniform float ready; varying vec3 vN;
+      void main(){
+        float z = clamp(-vN.z, 0., 1.), a = smoothstep(.0, .55, z);
+        float s = .55 + .6 * max(dot(-vN * vec3(1.,1.,0.), normalize(sun * vec3(1.,1.,0.))), 0.);
+        a = pow(a, 2.6) * s * .7;
+        gl_FragColor = vec4(vec3(1.,.64,.36), a * ready);
+      }
+    `
+  });
+  const atmosMesh = new THREE.Mesh(atmosGeo, atmosMat);
+  planetGroup.add(atmosMesh);
+
+  // Load Map Texture Seamlessly
+  let mapLoadedTime = 0;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = MAP;
+  img.onload = () => {
+    const W = 2688, H = 1344;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, W, H);
+
+    const fw = Math.floor(W * 0.07);
+    const tempC = document.createElement('canvas');
+    tempC.width = fw; tempC.height = H;
+    const tempCtx = tempC.getContext('2d');
+    tempCtx.drawImage(canvas, 0, 0, fw, H, 0, 0, fw, H);
+
+    tempCtx.globalCompositeOperation = 'destination-in';
+    const gradH = tempCtx.createLinearGradient(0, 0, fw, 0);
+    gradH.addColorStop(0, 'rgba(0,0,0,0)');
+    gradH.addColorStop(1, 'rgba(0,0,0,1)');
+    tempCtx.fillStyle = gradH;
+    tempCtx.fillRect(0, 0, fw, H);
+
+    ctx.drawImage(tempC, 0, 0, fw, H, W - fw, 0, fw, H);
+
+    const fh = Math.floor(H * 0.035);
+    const topG = ctx.createLinearGradient(0, 0, 0, fh);
+    topG.addColorStop(0, '#e9dfd2'); topG.addColorStop(1, 'transparent');
+    ctx.fillStyle = topG; ctx.fillRect(0, 0, W, fh);
+
+    const botG = ctx.createLinearGradient(0, H - fh, 0, H);
+    botG.addColorStop(0, 'transparent'); botG.addColorStop(1, '#e9dfd2');
+    ctx.fillStyle = botG; ctx.fillRect(0, H - fh, W, fh);
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.NoColorSpace;
+    tex.wrapS = THREE.RepeatWrapping;
+    tex.generateMipmaps = true;
+    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+    marsMaterial.uniforms.map.value = tex;
+    marsMaterial.uniforms.ready.value = 1.0;
+    atmosMat.uniforms.ready.value = 1.0;
+    mapLoadedTime = performance.now() / 1000;
+  };
+
+  // 4. Dust Canvas System
+  const dustCtx = dustCanvas.getContext('2d');
+  const spriteC = document.createElement('canvas');
+  spriteC.width = 64; spriteC.height = 64;
+  const sCtx = spriteC.getContext('2d');
+  const radG = sCtx.createRadialGradient(32, 32, 0, 32, 32, 32);
+  radG.addColorStop(0, 'rgba(255,214,170,.95)');
+  radG.addColorStop(0.4, 'rgba(255,180,120,.42)');
+  radG.addColorStop(1, 'transparent');
+  sCtx.fillStyle = radG;
+  sCtx.fillRect(0, 0, 64, 64);
+
+  const motes = [];
+  let seededRnd = 123456789;
+  function pseudoRnd() {
+    seededRnd = (seededRnd * 9301 + 49297) % 233280;
+    return seededRnd / 233280;
+  }
+  for (let i = 0; i < 34; i++) {
+    const r = pseudoRnd();
+    motes.push({
+      x: pseudoRnd(),
+      y: pseudoRnd(),
+      r: 3 + r * r * 34,
+      s: 0.004 + pseudoRnd() * 0.012,
+      p: pseudoRnd() * 6.28
+    });
   }
 
-  // ฟังก์ชันอัปเดตโจทย์ที่คุณครูกรอก
-  function setCustomTarget() {
-    const cInput = document.getElementById('customChinese').value.trim();
+  // 5. State Management & Transitions
+  let st = 0, fromSt = 0, toSt = 0, t0 = 0, dur = 1300;
+  let isDragging = false, dragStart = { x: 0, y: 0 }, lastPointer = { x: 0, y: 0 };
+  let pointerDist = 0;
+  let yaw = getFaceRot(getDir(THARSIS.u, THARSIS.v)).yaw;
+  let pitch = 0.16;
+  let vy = 0;
+  let lastDragTime = 0;
+  let mousePos = { x: 0, y: 0 };
 
-    if (cInput === "") {
-      alert("กรุณากรอกประโยคภาษาจีนครับ");
-      return;
+  const seg = (p, a, b) => Math.max(0, Math.min(1, (p - a) / (b - a)));
+  const io = k => k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  const out = k => 1 - Math.pow(1 - k, 3);
+  const clamp = (v, min = 0, max = 1) => Math.max(min, Math.min(max, v));
+
+  function go(n) {
+    if (n === toSt) return;
+    const now = performance.now();
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    fromSt = st;
+    toSt = n;
+    t0 = now;
+    const steps = Math.abs(toSt - fromSt);
+    dur = reduced ? 1 : (steps > 1 ? 2500 : (fromSt < 1 && toSt >= 1 ? 1300 : 2500));
+  }
+
+  // Input Events
+  let wheelLock = 0;
+  window.addEventListener('wheel', e => {
+    const now = performance.now();
+    if (now - wheelLock < 1400) return;
+    if (Math.abs(e.deltaY) > 8) {
+      if (e.deltaY > 0 && toSt < 2) { go(toSt + 1); wheelLock = now; }
+      else if (e.deltaY < 0 && toSt > 0) { go(toSt - 1); wheelLock = now; }
+    }
+  }, { passive: true });
+
+  window.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && toSt > 0) go(toSt - 1);
+  });
+
+  glCanvas.addEventListener('pointerdown', e => {
+    if (st >= 1.02) return;
+    isDragging = true;
+    glCanvas.classList.add('drag');
+    dragStart = { x: e.clientX, y: e.clientY };
+    lastPointer = { x: e.clientX, y: e.clientY };
+    pointerDist = 0;
+  });
+
+  window.addEventListener('pointermove', e => {
+    mousePos = { x: e.clientX / window.innerWidth - 0.5, y: e.clientY / window.innerHeight - 0.5 };
+    if (!isDragging) return;
+    const dx = e.clientX - lastPointer.x;
+    const dy = e.clientY - lastPointer.y;
+    pointerDist += Math.hypot(e.clientX - dragStart.x, e.clientY - dragStart.y);
+    lastPointer = { x: e.clientX, y: e.clientY };
+
+    const portrait = window.innerHeight > window.innerWidth * 1.05;
+    const R0 = portrait ? window.innerWidth * 0.36 : Math.min(window.innerHeight * 0.3, window.innerWidth * 0.19);
+    const k = 1.1 / R0;
+    yaw += dx * k;
+    pitch = clamp(pitch + dy * k, -1, 1);
+    vy = dx * k * 0.1;
+    lastDragTime = performance.now();
+  });
+
+  window.addEventListener('pointerup', e => {
+    if (!isDragging) return;
+    isDragging = false;
+    glCanvas.classList.remove('drag');
+    
+    if (pointerDist < 6 && toSt < 2) {
+      const rect = glCanvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+      const W = window.innerWidth, H = window.innerHeight;
+      const portrait = H > W * 1.05;
+      const R0 = portrait ? W * 0.36 : Math.min(H * 0.3, W * 0.19);
+      const grow = out(seg(performance.now()/1000 - mapLoadedTime, 0, 1.5));
+      const bz = io(seg(clamp(st - 1), 0, 0.62));
+      const R = R0 * Math.min(1, grow) * (1 + clamp(st) * 0.04) * Math.exp(bz * 2.5);
+      const px = portrait ? 0.5 * W : (0.5 - 0.14 * clamp(st)) * W;
+      const py = portrait ? (0.4 - 0.07 * clamp(st)) * H : 0.5 * H;
+      const cx = (px * (1 - bz)) + (0.5 * W * bz);
+      const cy = (py * (1 - bz)) + (0.5 * H * bz);
+
+      if (Math.hypot(clickX - cx, clickY - cy) <= R) {
+        go(toSt + 1);
+      }
+    }
+  });
+
+  document.getElementById('explore').addEventListener('click', e => { e.preventDefault(); go(2); });
+  document.getElementById('home').addEventListener('click', e => { e.preventDefault(); go(0); });
+  railBtns.forEach((btn, i) => btn.addEventListener('click', () => go(i)));
+
+  // Initial site selection
+  pick(0);
+
+  // 6. Main Render Loop
+  let lastFrameTime = performance.now();
+
+  function render(now) {
+    requestAnimationFrame(render);
+
+    const dt = Math.min((now - lastFrameTime) / 1000, 0.05);
+    lastFrameTime = now;
+
+    const W = window.innerWidth, H = window.innerHeight;
+    if (glCanvas.width !== W || glCanvas.height !== H) {
+      renderer.setSize(W, H, false);
+      camera.left = -W / 2; camera.right = W / 2;
+      camera.top = H / 2; camera.bottom = -H / 2;
+      camera.updateProjectionMatrix();
+    }
+    if (dustCanvas.width !== W || dustCanvas.height !== H) {
+      dustCanvas.width = W; dustCanvas.height = H;
     }
 
-    targetSentence = cInput;
-    document.getElementById('targetChineseDisplay').innerText = targetSentence;
-    document.getElementById('targetMeaningDisplay').innerText = "โจทย์: " + targetSentence;
-    
-    // ซ่อนกล่องแจ้งเตือนทั้งหมดเมื่อเปลี่ยนโจทย์ใหม่
-    document.getElementById('revealBox').style.display = 'none';
-    document.getElementById('errorBox').style.display = 'none';
-    document.getElementById('resultText').innerText = 'เปลี่ยนโจทย์เรียบร้อย! ให้เด็กๆ ลองกดไมค์อ่านได้เลย';
-  }
-
-  // ฟังก์ชันควบคุมไมค์
-  function toggleListening() {
-    if (!recognition) return;
-    const btn = document.getElementById('micBtn');
-    
-    if (!isListening) {
-      recognition.start();
-      isListening = true;
-      btn.innerText = '🛑 กำลังฟังเสียง... พูดเลย!';
-      btn.classList.add('listening');
-      document.getElementById('revealBox').style.display = 'none';
-      document.getElementById('errorBox').style.display = 'none';
-      document.getElementById('resultText').innerText = 'กำลังฟังเสียง...';
+    // State Progression
+    if (dur > 0) {
+      st = THREE.MathUtils.lerp(fromSt, toSt, io(seg(now, t0, t0 + dur)));
     } else {
-      recognition.stop();
+      st = toSt;
     }
+
+    const a = clamp(st, 0, 1);
+    const b = clamp(st - 1, 0, 1);
+    const portrait = H > W * 1.05;
+    const R0 = portrait ? W * 0.36 : Math.min(H * 0.3, W * 0.19);
+    const age = mapLoadedTime > 0 ? (now / 1000 - mapLoadedTime) : 0;
+    const grow = out(seg(age, 0, 1.5));
+    const iw = out(seg(age, 0.75, 1.7));
+    const bz = io(seg(b, 0, 0.62));
+
+    // Planet Position & Size
+    const px = portrait ? 0.5 * W : (0.5 - 0.14 * a) * W;
+    const py = portrait ? (0.4 - 0.07 * a) * H : 0.5 * H;
+    const R = R0 * (0.03 + 0.97 * grow) * (1 + a * 0.04) * Math.exp(bz * 2.5);
+    const cx = px * (1 - bz) + (0.5 * W * bz);
+    const cy = py * (1 - bz) + (0.5 * H * bz);
+
+    planetGroup.position.set(cx - W / 2, H / 2 - cy, 0);
+    planetGroup.scale.set(R, R, R);
+
+    // Rotation Control
+    if (st < 0.02 && !isDragging && (now - lastDragTime > 1500)) {
+      yaw += dt * (0.08 + (1 - grow) * 2.4);
+    } else if (isDragging) {
+      // Manual drag handled in pointermove
+    } else if (st >= 0.02) {
+      const targetData = b > 0 ? SITES[activeSiteIdx] : THARSIS;
+      const targetDir = getDir(targetData.u, targetData.v);
+      const faceRot = getFaceRot(targetDir);
+
+      let diffYaw = (faceRot.yaw - yaw) % (Math.PI * 2);
+      if (diffYaw > Math.PI) diffYaw -= Math.PI * 2;
+      if (diffYaw < -Math.PI) diffYaw += Math.PI * 2;
+
+      const f = r => 1 - Math.exp(-dt * r);
+      yaw += diffYaw * f(3.6);
+      pitch += (faceRot.lat - pitch) * f(3.6);
+    } else {
+      yaw += vy;
+      vy *= Math.exp(-dt * 4);
+      pitch += (0.16 - pitch) * (1 - Math.exp(-dt * 1.2));
+    }
+
+    tiltGroup.rotation.x = pitch;
+    spinGroup.rotation.y = yaw;
+
+    // Shader Uniforms
+    const targetSite = SITES[activeSiteIdx];
+    const currHiDir = b > 0.02 ? getDir(targetSite.u, targetSite.v) : getDir(THARSIS.u, THARSIS.v);
+    marsMaterial.uniforms.hiDir.value.copy(currHiDir);
+    marsMaterial.uniforms.hiR.value = b > 0.02 ? THREE.MathUtils.lerp(0.62, 0.3, seg(b, 0, 0.1)) : 0.62;
+    marsMaterial.uniforms.hi.value = clamp(seg(a, 0.15, 0.6) + (b > 0 ? 1 : 0));
+
+    renderer.render(scene, camera);
+
+    // --- DOM UI Updates ---
+
+    // word0
+    const word0OffX = portrait ? 0 : -a * 0.08 * W;
+    const word0OffY = portrait ? (H * -0.1 + R * 1.08 + word0El.offsetHeight * 0.5) : mousePos.y * H * -6;
+    word0El.style.transform = `translate(calc(-50% + ${word0OffX}px), calc(-50% + ${word0OffY}px))`;
+    const I = (1 - iw) * 50;
+    word0El.style.clipPath = `inset(-10% ${I}% -10% ${I}%)`;
+    word0El.style.opacity = 1 - seg(a, 0.1, 0.5);
+
+    // eyebrow
+    if (portrait) {
+      eyebrowEl.style.transform = `translate(-50%, calc(-50% + ${word0OffY + word0El.offsetHeight * 0.6}px))`;
+    } else {
+      const wordRect = word0El.getBoundingClientRect();
+      eyebrowEl.style.transform = `translate(${wordRect.left + wordRect.width * 0.02 - W / 2}px, ${word0OffY - word0El.offsetHeight / 2 - 34}px)`;
+    }
+    eyebrowEl.style.opacity = iw * (1 - seg(a, 0.05, 0.35));
+
+    // flare
+    flareEl.style.left = `${cx + R * 0.74}px`;
+    flareEl.style.top = `${cy - R * 0.62}px`;
+    flareEl.style.opacity = grow * (0.88 + 0.12 * Math.sin(now / 1000 * 1.3)) * (1 - seg(bz, 0, 0.35));
+
+    // hint
+    hintEl.style.opacity = iw * 0.8 * (1 - seg(a, 0, 0.25));
+
+    // pin
+    const tharsisDir = getDir(THARSIS.u, THARSIS.v);
+    tharsisDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
+    tharsisDir.applyAxisAngle(new THREE.Vector3(1, 0, 0), pitch);
+    pinEl.style.left = `${cx + tharsisDir.x * R - 6}px`;
+    pinEl.style.top = `${cy - tharsisDir.y * R - 8}px`;
+    pinEl.style.opacity = seg(tharsisDir.z, 0.22, 0.42) * seg(age, 1.6, 2.1) * (1 - seg(a, 0, 0.3));
+
+    // word1
+    const ka = seg(a, 0.45, 1);
+    word1El.style.opacity = ka * (1 - seg(b, 0.02, 0.16));
+    const word1OffX = portrait ? 0 : (0.02 * W + (1 - out(ka)) * 40);
+    word1El.style.transform = `translate(calc(-50% + ${word1OffX}px), 0)`;
+    word1El.style.top = `${portrait ? 0.46 * H : 0.56 * H}px`;
+
+    // sites & card
+    const sitesOpacity = seg(a, 0.55, 1) * (1 - seg(b, 0, 0.14));
+    sitesUl.style.opacity = sitesOpacity;
+    sitesUl.style.pointerEvents = sitesOpacity > 0.6 ? 'auto' : 'none';
+    cardEl.style.opacity = sitesOpacity;
+    cardEl.style.pointerEvents = sitesOpacity > 0.6 ? 'auto' : 'none';
+    cardEl.style.transform = `translateX(${(1 - out(seg(a, 0.6, 1))) * 26}px)`;
+
+    pick(activeSiteIdx);
+
+    // region
+    regionEl.innerText = targetSite.name.toUpperCase();
+    regionEl.style.opacity = seg(b, 0.14, 0.26) * (1 - seg(b, 0.42, 0.52));
+
+    // fog
+    const fi = seg(b, 0.36, 0.54);
+    const fo = seg(b, 0.62, 0.96);
+    fogEl.style.opacity = fi * (1 - fo);
+
+    // Landing Layers
+    const landVis = b > 0.5;
+    landEl.style.opacity = landVis ? 1 : 0;
+    foreEl.style.opacity = landVis ? 1 : 0;
+    destEl.style.opacity = landVis ? 1 : 0;
+
+    if (landVis) {
+      const lk = out(seg(b, 0.5, 1));
+      const fk = out(seg(b, 0.58, 1));
+      const dk = out(seg(b, 0.66, 0.98));
+      const drift = 1 + 0.02 * Math.sin(now / 1000 * 0.18);
+
+      landEl.style.transform = `translate(${mousePos.x * -14}px, ${THREE.MathUtils.lerp(0.2 * H, mousePos.y * -8, lk)}px) scale(${THREE.MathUtils.lerp(1.3, 1.05, lk) * drift})`;
+      foreEl.style.transform = `translate(${mousePos.x * -46}px, ${THREE.MathUtils.lerp(0.42 * H, 0, fk)}px) scale(1.06)`;
+      
+      const destEndY = portrait ? 0.3 * H : 0.27 * H;
+      destEl.style.transform = `translate(${mousePos.x * -26}px, ${THREE.MathUtils.lerp(0.62 * H, destEndY, dk)}px)`;
+      destEl.querySelector('small').style.opacity = seg(b, 0.8, 1) * 0.92;
+    }
+
+    // bar & scrim
+    const bk = seg(b, 0.86, 1);
+    barEl.style.opacity = bk;
+    barEl.style.pointerEvents = bk > 0.5 ? 'auto' : 'none';
+    barEl.style.transform = `translate(-50%, ${(1 - out(bk)) * 34}px)`;
+
+    scrimEl.style.opacity = seg(b, 0.6, 0.9);
+
+    // rail
+    const activeIndex = Math.round(st);
+    railBtns.forEach((btn, idx) => btn.classList.toggle('on', idx === activeIndex));
+
+    // --- Dust Particles Render ---
+    dustCtx.clearRect(0, 0, W, H);
+    const dustAlphaMult = b > 0.5 ? 0.7 : 1.0;
+    const timeSec = now / 1000;
+
+    motes.forEach(m => {
+      const mx = ((m.x + timeSec * m.s + 2) % 1.1 - 0.05) * W;
+      const my = (m.y + Math.sin(timeSec * 0.3 + m.p) * 0.02) * H;
+      const alpha = (0.3 + 0.35 * Math.pow(Math.sin(timeSec * 0.7 + m.p), 2)) * dustAlphaMult;
+
+      dustCtx.globalAlpha = alpha;
+      dustCtx.drawImage(spriteC, mx - m.r, my - m.r, m.r * 2, m.r * 2);
+    });
   }
 
-  // ฟังก์ชันกดฟังเสียงเจ้าของภาษา
-  function speakTarget() {
-    const utterance = new SpeechSynthesisUtterance(targetSentence);
-    utterance.lang = 'zh-CN';
-    window.speechSynthesis.speak(utterance);
-  }
+  requestAnimationFrame(render);
 </script>
 
 </body>
