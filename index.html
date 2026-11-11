@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Custom Matching Game</title>
+  <title>ระบบฝึกพูดภาษาจีน - Teacher Custom Game</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -177,27 +177,6 @@
     }
     .teacher-box button:hover { background: #22c55e; }
 
-    .preset-lessons {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .btn-preset {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: #fff;
-      padding: 8px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: center;
-    }
-    .btn-preset:hover { background: rgba(255, 255, 255, 0.2); }
-
-    /* ส่วนระบบฝึกพูด */
     .target-box {
       background: rgba(255, 255, 255, 0.02);
       border: 1px dashed rgba(255, 255, 255, 0.15);
@@ -254,7 +233,7 @@
 
     .result-box { margin-top: 16px; font-size: 14px; color: rgba(255,255,255,0.5); min-height: 24px; font-weight: 400; }
 
-    /* มินิเกมจับคู่ (Match Game Modal / Section) */
+    /* มินิเกมจับคู่ */
     .game-section {
       display: none;
       background: rgba(15, 15, 20, 0.85);
@@ -330,17 +309,17 @@
   <div class="content-wrapper">
     
     <div class="top-bar">
-      <button class="btn-top" onclick="toggleGameSection()">🧩 เล่นมินิเกมจับคู่</button>
-      <button class="btn-top" onclick="toggleTeacherMode()">⚙️ โหมดคุณครู</button>
+      <button class="btn-top" onclick="toggleGameSection()">เล่นมินิเกมจับคู่</button>
+      <button class="btn-top" onclick="toggleTeacherMode()">โหมดคุณครู</button>
     </div>
 
     <div class="score-badge">
-      <span>⭐ คะแนนสะสม:</span>
+      <span>คะแนนสะสม:</span>
       <span id="scoreCount" style="color: #fbbf24; font-weight: 700; font-size: 15px;">0</span>
       <span>ดาว</span>
     </div>
 
-    <!-- แผงมินิเกมจับคู่คำศัพท์ (Warm-up) -->
+    <!-- แผงมินิเกมจับคู่คำศัพท์ -->
     <div class="game-section" id="gameSection">
       <h2>มินิเกมจับคู่คำศัพท์</h2>
       <div style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px;">คลิกจับคู่ตัวอักษรจีนกับคำแปลภาษาไทยให้ถูกต้อง</div>
@@ -355,23 +334,16 @@
 
       <!-- แผงตั้งค่าของคุณครู (PIN: 123) -->
       <div class="teacher-box" id="teacherBox">
-        <label>🛠️ ตั้งค่าโจทย์ฝึกพูดเดี่ยว</label>
+        <label>ตั้งค่าโจทย์ฝึกพูดเดี่ยว</label>
         <input type="text" id="customChinese" value="今天老师很好。" placeholder="พิมพ์ประโยคภาษาจีน...">
         <button onclick="setCustomTarget()">บันทึกและเปลี่ยนโจทย์</button>
 
-        <label style="margin-top: 16px;">📚 คลังบทเรียนสำเร็จรูป</label>
-        <div class="preset-lessons">
-          <button class="btn-preset" onclick="selectPreset('你好！')">บทที่ 1: สวัสดี</button>
-          <button class="btn-preset" onclick="selectPreset('你叫什么名字？')">บทที่ 2: คุณชื่ออะไร</button>
-          <button class="btn-preset" onclick="selectPreset('今天老师很好。')">บทที่ 3: คุณครูใจดี</button>
-        </div>
-
-        <label style="margin-top: 16px;">🧩 ตั้งค่าคำศัพท์สำหรับมินิเกมจับคู่ (รูปแบบ: จีน|ไทย คั่นด้วยบรรทัดใหม่)</label>
+        <label style="margin-top: 16px;">ตั้งค่าคำศัพท์สำหรับมินิเกมจับคู่ (รูปแบบ: จีน|ไทย คั่นด้วยบรรทัดใหม่)</label>
         <textarea id="customPairsInput">你好|สวัสดี
 老师|คุณครู
 学生|นักเรียน
 谢谢|ขอบคุณ</textarea>
-        <button onclick="saveCustomPairs()" style="background: #38bdf8; color: #0f172a;">อัปเดตคำศัพท์ในมินิเกม</button>
+        <button onclick="saveCustomPairs()" style="background: #38bdf8; color: #0f172a; margin-top: 8px;">อัปเดตคำศัพท์ในมินิเกม</button>
       </div>
 
       <div class="target-box">
@@ -419,7 +391,6 @@
 
   const TEACHER_PASSWORD = "123";
 
-  // คลังข้อมูลคู่คำศัพท์สำหรับมินิเกม (คุณครูสามารถเพิ่ม/แก้ไขได้ในโหมดคุณครู)
   let vocabPairs = [
     { chinese: "你好", thai: "สวัสดี" },
     { chinese: "老师", thai: "คุณครู" },
@@ -445,7 +416,6 @@
     }
   }
 
-  // เปิด/ปิดหน้าต่างมินิเกมจับคู่
   function toggleGameSection() {
     const gameSec = document.getElementById('gameSection');
     const appCard = document.getElementById('appCard');
@@ -459,7 +429,6 @@
     }
   }
 
-  // สร้างและสลับตำแหน่งการ์ดมินิเกม
   function initGame() {
     const grid = document.getElementById('gameGrid');
     grid.innerHTML = '';
@@ -471,7 +440,6 @@
       tiles.push({ text: pair.thai, pairId: index, type: 'thai' });
     });
 
-    // สลับตำแหน่งการ์ด (Shuffle)
     tiles.sort(() => Math.random() - 0.5);
 
     tiles.forEach(tileData => {
@@ -484,7 +452,6 @@
     });
   }
 
-  // ระบบตรวจสอบการจับคู่
   function handleCardClick(card, tileData) {
     if (card.classList.contains('matched') || card.classList.contains('selected')) return;
 
@@ -493,7 +460,6 @@
       card.classList.add('selected');
     } else {
       if (selectedTile.tileData.pairId === tileData.pairId && selectedTile.tileData.type !== tileData.type) {
-        // จับคู่ถูกต้อง
         card.classList.add('matched');
         selectedTile.card.classList.add('matched');
         selectedTile.card.classList.remove('selected');
@@ -501,10 +467,9 @@
 
         playSuccessChime();
 
-        // เช็คว่าชนะเกมหรือยัง
         if (document.querySelectorAll('.game-card.matched').length === vocabPairs.length * 2) {
           setTimeout(() => {
-            totalScore += 2; // ได้โบนัส 2 ดาว
+            totalScore += 2;
             document.getElementById('scoreCount').innerText = totalScore;
             triggerCelebration();
             alert("ยอดเยี่ยม! จับคู่คำศัพท์ถูกต้องทั้งหมด รับไปเลย +2 ดาว!");
@@ -512,7 +477,6 @@
           }, 300);
         }
       } else {
-        // จับคู่ผิด
         card.classList.add('selected');
         setTimeout(() => {
           card.classList.remove('selected');
@@ -523,7 +487,6 @@
     }
   }
 
-  // บันทึกคู่คำศัพท์ใหม่ที่คุณครูกรอกเข้ามา
   function saveCustomPairs() {
     const rawText = document.getElementById('customPairsInput').value.trim();
     const lines = rawText.split('\n');
@@ -543,19 +506,6 @@
     } else {
       alert("รูปแบบไม่ถูกต้อง กรุณาใช้รูปแบบ จีน|ไทย ในแต่ละบรรทัด");
     }
-  }
-
-  function selectPreset(sentence) {
-    targetSentence = sentence;
-    hasScoredForCurrent = false;
-    document.getElementById('customChinese').value = sentence;
-    document.getElementById('targetChineseDisplay').innerText = targetSentence;
-    document.getElementById('targetMeaningDisplay').innerText = "โจทย์: " + targetSentence;
-    
-    document.getElementById('revealBox').style.display = 'none';
-    document.getElementById('errorBox').style.display = 'none';
-    document.getElementById('resultText').innerText = 'เปลี่ยนบทเรียนเรียบร้อย พร้อมสำหรับฝึกอ่าน';
-    document.getElementById('teacherBox').style.display = 'none';
   }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
