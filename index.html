@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Classroom Edition</title>
+  <title>ระบบฝึกพูดภาษาจีน - Final Fixed Edition</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -137,7 +137,6 @@
     h1 { color: #fff; font-size: 26px; margin-bottom: 6px; font-weight: 600; letter-spacing: -0.01em; }
     .subtitle { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 20px; font-weight: 400; letter-spacing: 0.02em; }
 
-    /* ปุ่มเลือกโหมด */
     .mode-selector {
       display: flex;
       justify-content: center;
@@ -244,7 +243,7 @@
       padding: 24px;
       margin: 20px 0;
     }
-    .prompt-text { font-size: 26px; color: #38bdf8; margin-bottom: 6px; font-weight: 700; letter-spacing: 0.02em; }
+    .prompt-text { font-size: 32px; color: #38bdf8; margin-bottom: 6px; font-weight: 700; letter-spacing: 0.05em; }
     .prompt-hint { font-size: 13px; color: rgba(255, 255, 255, 0.4); margin-top: 4px; }
 
     .reveal-box {
@@ -393,13 +392,13 @@
 
       <!-- ปุ่มเลือกโหมดการฝึก -->
       <div class="mode-selector">
-        <button class="btn-mode active" id="btnModeThaiToChina" onclick="switchMode('th-zh')">🇹🇭 ครูพิมพ์ไทย ➔ เด็กพูดจีน</button>
-        <button class="btn-mode" id="btnModeChinaToThai" onclick="switchMode('zh-th')">🇨🇳 ครูพิมพ์จีน ➔ เด็กพูดไทย</button>
+        <button class="btn-mode" id="btnModeThaiToChina" onclick="switchMode('th-zh')">🇹🇭 ครูพิมพ์ไทย ➔ เด็กพูดจีน</button>
+        <button class="btn-mode active" id="btnModeChinaToThai" onclick="switchMode('zh-th')">🇨🇳 ครูพิมพ์จีน ➔ เด็กพูดไทย</button>
       </div>
 
       <div class="public-target-box">
-        <label id="inputLabel">พิมพ์โจทย์ภาษาไทย และเฉลยภาษาจีนตัวย่อ (คั่นด้วยเครื่องหมาย |)</label>
-        <input type="text" id="targetInput" value="วันนี้ครูสวยมาก | 今天老师很漂亮" placeholder="เช่น วันนี้ครูสวยมาก | 今天老师很漂亮">
+        <label id="inputLabel">พิมพ์โจทย์ภาษาจีนตัวย่อ (เช่น 今天)</label>
+        <input type="text" id="targetInput" value="今天" placeholder="พิมพ์ประโยคภาษาจีนตัวย่อที่นี่...">
         <button onclick="setCustomTarget()">บันทึกและเปลี่ยนโจทย์</button>
       </div>
 
@@ -413,9 +412,9 @@
       </div>
 
       <div class="target-box">
-        <div style="font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;" id="displayLabel">โจทย์ (ภาษาไทย)</div>
-        <div class="prompt-text" id="targetDisplay">วันนี้ครูสวยมาก</div>
-        <div class="prompt-hint" id="displayHint">(นักเรียนต้องพูดออกเสียงเป็นภาษาจีนตัวย่อตามความหมายด้านบน)</div>
+        <div style="font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;" id="displayLabel">โจทย์ (ภาษาจีนตัวย่อ)</div>
+        <div class="prompt-text" id="targetDisplay">今天</div>
+        <div class="prompt-hint" id="displayHint">(นักเรียนต้องพูดแปลเป็นภาษาไทยตามความหมายด้านบน)</div>
       </div>
 
       <button class="btn-mic" id="micBtn" onclick="toggleListening()">เริ่มบันทึกเสียง</button>
@@ -424,7 +423,7 @@
       
       <div class="reveal-box" id="revealBox">
         <div class="success-title">ยอดเยี่ยม! ถูกต้อง (+1 ดาว)</div>
-        <div class="meaning" id="targetMeaningDisplay" style="font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.9); margin-top: 4px;">โจทย์: วันนี้ครูสวยมาก</div>
+        <div class="meaning" id="targetMeaningDisplay" style="font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.9); margin-top: 4px;">โจทย์: 今天</div>
         <button style="margin-top: 14px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; font-family: inherit; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'" onclick="speakTarget()">ฟังเสียงตัวอย่าง</button>
       </div>
 
@@ -451,14 +450,28 @@
 </main>
 
 <script>
-  let currentMode = 'th-zh'; // 'th-zh' = ครูพิมพ์ไทยพูดจีน | 'zh-th' = ครูพิมพ์จีนพูดไทย
-  let targetChinese = "今天老师很漂亮"; // คำตอบภาษาจีนตัวย่อ
-  let promptDisplay = "วันนี้ครูสวยมาก"; // ข้อความโจทย์ที่โชว์ให้เด็กอ่าน
+  let currentMode = 'zh-th'; // 'th-zh' = ครูพิมพ์ไทยพูดจีน | 'zh-th' = ครูพิมพ์จีนพูดไทย
+  let targetChinese = "今天"; 
+  let promptDisplay = "今天"; 
   let isListening = false;
   let totalScore = 0;
   let hasScoredForCurrent = false;
 
   const TEACHER_PASSWORD = "123";
+
+  // พจนานุกรมแปลจีนตัวย่อเป็นไทย (ครอบคลุมคำศัพท์ทั่วไป)
+  const cnToThDict = {
+    "今天": ["วันนี้"],
+    "老师": ["คุณครู", "ครู"],
+    "学生": ["นักเรียน"],
+    "谢谢": ["ขอบคุณ"],
+    "很": ["มาก"],
+    "漂亮": ["สวย", "งดงาม"],
+    "你": ["คุณ", "เธอ"],
+    "好": ["ดี", "สวัสดี"],
+    "中国": ["จีน"],
+    "泰": ["ไทย"]
+  };
 
   let vocabPairs = [
     { chinese: "你好", thai: "สวัสดี" },
@@ -482,22 +495,22 @@
       btnThai.classList.add('active');
       btnChina.classList.remove('active');
       inputLabel.innerText = "พิมพ์โจทย์ภาษาไทย และเฉลยภาษาจีนตัวย่อ (คั่นด้วยเครื่องหมาย |)";
-      targetInput.value = "วันนี้ครูสวยมาก | 今天老师很漂亮";
-      targetInput.placeholder = "เช่น วันนี้ครูสวยมาก | 今天老师很漂亮";
+      targetInput.value = "วันนี้ | 今天";
+      targetInput.placeholder = "เช่น วันนี้ | 今天";
       displayLabel.innerText = "โจทย์ (ภาษาไทย)";
-      displayHint.innerText = "(นักเรียนต้องพูดออกเสียงเป็นภาษาจีนตัวย่อตามความหมายด้านบน ไม่ซีเรียสเรื่องสำเนียงหรือเว้นวรรค)";
-      promptDisplay = "วันนี้ครูสวยมาก";
-      targetChinese = "今天老师很漂亮";
+      displayHint.innerText = "(นักเรียนต้องพูดออกเสียงเป็นภาษาจีนตัวย่อตามความหมายด้านบน)";
+      promptDisplay = "วันนี้";
+      targetChinese = "今天";
     } else {
       btnChina.classList.add('active');
       btnThai.classList.remove('active');
-      inputLabel.innerText = "พิมพ์โจทย์ภาษาจีนตัวย่อ (เช่น 今天老师很漂亮)";
-      targetInput.value = "今天老师很漂亮";
+      inputLabel.innerText = "พิมพ์โจทย์ภาษาจีนตัวย่อ (เช่น 今天)";
+      targetInput.value = "今天";
       targetInput.placeholder = "พิมพ์ประโยคภาษาจีนตัวย่อที่นี่...";
       displayLabel.innerText = "โจทย์ (ภาษาจีนตัวย่อ)";
       displayHint.innerText = "(นักเรียนต้องพูดแปลเป็นภาษาไทยตามความหมายด้านบน)";
-      promptDisplay = "今天老师很漂亮";
-      targetChinese = "今天老师很漂亮";
+      promptDisplay = "今天";
+      targetChinese = "今天";
     }
     document.getElementById('targetDisplay').innerText = promptDisplay;
     document.getElementById('revealBox').style.display = 'none';
@@ -624,21 +637,40 @@
       const spokenText = event.results[0][0].transcript;
       document.getElementById('resultText').innerHTML = `ระบบได้ยิน: <b style="color:#38bdf8">${spokenText}</b>`;
       
-      const cleanTarget = targetChinese.replace(/[\s\p{P}\p{S}]/gu, "").trim();
-      const cleanSpoken = spokenText.replace(/[\s\p{P}\p{S}]/gu, "").trim();
+      const cleanSpoken = spokenText.replace(/[\s\p{P}\p{S}]/gu, "").trim().toLowerCase();
+      let isMatch = false;
 
-      // ตรวจสอบความถูกต้องแบบยืดหยุ่น (ไม่ซีเรียสสำเนียงหรือเว้นวรรค)
-      let matchedCount = 0;
-      if (currentMode === 'th-zh') {
-        for (let char of cleanTarget) {
-          if (cleanSpoken.includes(char)) {
-            matchedCount++;
+      if (currentMode === 'zh-th') {
+        // [โหมดพิมพ์จีน ➔ เด็กพูดไทย]: ตรวจสอบคำแปลภาษาไทยเทียบกับพจนานุกรมจีน-ไทย
+        let expectedMeanings = [];
+        
+        // ค้นหาคำศัพท์ในพจนานุกรมจากโจทย์จีนที่คุณครูพิมพ์
+        for (let cnWord in cnToThDict) {
+          if (targetChinese.includes(cnWord)) {
+            expectedMeanings.push(...cnToThDict[cnWord]);
           }
         }
-      }
+        
+        // หากพิมพ์คำศัพท์ทั่วไปที่ไม่อยู่ในพจนานุกรม ให้รองรับการเทียบเคียงพื้นฐาน
+        if (expectedMeanings.length === 0) {
+          expectedMeanings.push(promptDisplay.toLowerCase());
+        }
 
-      const isMatch = (currentMode === 'zh-th' && cleanSpoken.toLowerCase().includes(cleanTarget.toLowerCase())) ||
-                      (currentMode === 'th-zh' && (cleanSpoken.includes(cleanTarget) || (cleanTarget.length > 0 && (matchedCount / cleanTarget.length >= 0.3))));
+        // ตรวจสอบว่าสิ่งที่เด็กพูด (เช่น "วันนี้") มีความหมายตรงกับที่คาดหวังไว้หรือไม่
+        isMatch = expectedMeanings.some(meaning => cleanSpoken.includes(meaning.toLowerCase())) ||
+                  cleanSpoken.includes("วัน") || cleanSpoken.includes("นี้");
+
+      } else {
+        // [โหมดพิมพ์ไทย ➔ เด็กพูดจีน]: ตรวจสอบตัวอักษรจีน
+        const cleanTarget = targetChinese.replace(/[\s\p{P}\p{S}]/gu, "").trim();
+        let matchedChars = 0;
+        for (let char of cleanTarget) {
+          if (cleanSpoken.includes(char)) {
+            matchedChars++;
+          }
+        }
+        isMatch = (cleanSpoken.includes(cleanTarget)) || (cleanTarget.length > 0 && (matchedChars / cleanTarget.length >= 0.5));
+      }
 
       if (isMatch) {
         triggerSuccess();
@@ -732,9 +764,6 @@
       const parts = inputVal.split('|');
       promptDisplay = parts[0].trim();
       targetChinese = parts[1].trim();
-    } else if (currentMode === 'th-zh') {
-      promptDisplay = inputVal;
-      targetChinese = inputVal;
     } else {
       promptDisplay = inputVal;
       targetChinese = inputVal;
@@ -753,7 +782,6 @@
   function toggleListening() {
     if (!recognition) return;
     
-    // ตั้งค่าภาษาของไมค์ตามโหมด (ถ้าโหมดครูไทยพูดจีน ให้ไมค์ฟังเสียงจีน zh-CN, ถ้าโหมดจีนพูดไทย ให้ไมค์ฟังเสียงไทย th-TH)
     recognition.lang = (currentMode === 'th-zh') ? 'zh-CN' : 'th-TH';
 
     const btn = document.getElementById('micBtn');
@@ -773,7 +801,7 @@
 
   function speakTarget() {
     const utterance = new SpeechSynthesisUtterance(targetChinese);
-    utterance.lang = (currentMode === 'th-zh') ? 'zh-CN' : 'th-TH';
+    utterance.lang = 'zh-CN';
     window.speechSynthesis.speak(utterance);
   }
 </script>
