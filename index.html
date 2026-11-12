@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Flexible Matching</title>
+  <title>ระบบฝึกพูดภาษาจีน - Perfect Balance Matching</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -449,7 +449,7 @@
 
 <script>
   let currentMode = 'th-zh';
-  let targetText = "今天老师很漂亮"; // ค่าเริ่มต้นเป้าหมายภาษาจีน (ตัดเครื่องหมายจุดท้ายออกเพื่อความยืดหยุ่น)
+  let targetText = "今天老师很漂亮";
   let isListening = false;
   let totalScore = 0;
   let hasScoredForCurrent = false;
@@ -557,7 +557,7 @@
       selectedTile = { card, tileData };
       card.classList.add('selected');
     } else {
-      if (selectedTile.tileData.pairId === tileData.pairId && selectedTile.tileData.type !== tileData.type) {
+      if (selectedTile.tileData.pairId === tileData.tileData.pairId && selectedTile.tileData.type !== tileData.type) {
         card.classList.add('matched');
         selectedTile.card.classList.add('matched');
         selectedTile.card.classList.remove('selected');
@@ -618,12 +618,15 @@
       const spokenText = event.results[0][0].transcript;
       document.getElementById('resultText').innerHTML = `ระบบได้ยิน: <b style="color:#38bdf8">${spokenText}</b>`;
       
-      // ฟังก์ชันทำความสะอาดข้อความ ตัดช่องว่างและเครื่องหมายวรรคตอนทิ้งทั้งหมดเพื่อให้ตรวจเจอคำพูดได้ง่ายขึ้น
       const cleanTarget = targetText.replace(/[\s\p{P}\p{S}]/gu, "").trim().toLowerCase();
       const cleanSpoken = spokenText.replace(/[\s\p{P}\p{S}]/gu, "").trim().toLowerCase();
 
-      // ตรวจสอบความถูกต้องแบบผ่อนปรน (เทียบตัวอักษรเนื้อหาโดยไม่สนเครื่องหมายและช่องว่าง)
-      if (cleanSpoken === cleanTarget || cleanSpoken.includes(cleanTarget) || cleanTarget.includes(cleanSpoken)) {
+      // [ปรับลดความเข้มงวดให้พอดี]: ใช้การเช็กแบบยืดหยุ่น ขอแค่มีคำหลักหรือข้อความตรงกันบางส่วน (Substring Match) ก็ให้ผ่าน
+      const isMatch = cleanSpoken === cleanTarget || 
+                      (cleanTarget.length > 1 && cleanSpoken.includes(cleanTarget)) || 
+                      (cleanSpoken.length > 1 && cleanTarget.includes(cleanSpoken));
+
+      if (isMatch) {
         document.getElementById('revealBox').style.display = 'block';
         document.getElementById('errorBox').style.display = 'none';
         document.getElementById('resultText').innerText = '';
@@ -717,7 +720,6 @@
   function toggleListening() {
     if (!recognition) return;
     
-    // ตั้งค่าภาษาที่จะฟังตามโหมด
     recognition.lang = (currentMode === 'th-zh') ? 'zh-CN' : 'th-TH';
 
     const btn = document.getElementById('micBtn');
