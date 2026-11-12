@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Ultimate Classroom Edition</title>
+  <title>中文口语训练系统 - 精准字符匹配</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
+    /* Liquid Glass Effect */
     .liquid-glass {
       background: rgba(18, 18, 22, 0.4);
       background-blend-mode: luminosity;
@@ -137,29 +138,6 @@
     h1 { color: #fff; font-size: 26px; margin-bottom: 6px; font-weight: 600; letter-spacing: -0.01em; }
     .subtitle { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 24px; font-weight: 400; letter-spacing: 0.02em; }
 
-    .mode-selector {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .btn-mode {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: rgba(255, 255, 255, 0.6);
-      padding: 10px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-mode.active {
-      background: rgba(56, 189, 248, 0.2);
-      border-color: #38bdf8;
-      color: #38bdf8;
-    }
-
     .public-target-box {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -243,7 +221,7 @@
       padding: 24px;
       margin: 20px 0;
     }
-    .prompt-text { font-size: 24px; color: #38bdf8; margin-bottom: 6px; font-weight: 600; letter-spacing: 0.02em; }
+    .prompt-text { font-size: 32px; color: #38bdf8; margin-bottom: 6px; font-weight: 700; letter-spacing: 0.05em; }
     .prompt-hint { font-size: 13px; color: rgba(255, 255, 255, 0.4); margin-top: 4px; }
 
     .reveal-box {
@@ -368,66 +346,61 @@
   <div class="content-wrapper">
     
     <div class="top-bar">
-      <button class="btn-top" onclick="toggleGameSection()">เล่นมินิเกมจับคู่</button>
-      <button class="btn-top" onclick="toggleTeacherMode()">โหมดคุณครู</button>
+      <button class="btn-top" onclick="toggleGameSection()">词语连线小游戏</button>
+      <button class="btn-top" onclick="toggleTeacherMode()">教师模式</button>
     </div>
 
-    <!-- คลิกที่คะแนนดาวเพื่อช่วยกดผ่านให้เด็กกรณีฉุกเฉินได้ -->
-    <div class="score-badge" onclick="forcePass()" title="คลิกเพื่อช่วยกดผ่านให้นักเรียน">
-      <span>⭐ คะแนนสะสม (คลิกช่วยผ่าน):</span>
+    <!-- 点击积分星标可以协助学生直接通过 -->
+    <div class="score-badge" onclick="forcePass()" title="点击此处可协助学生直接通过">
+      <span>⭐ 积分星标 (点击协助通过):</span>
       <span id="scoreCount" style="color: #fbbf24; font-weight: 700; font-size: 15px;">0</span>
-      <span>ดาว</span>
+      <span>颗</span>
     </div>
 
     <div class="game-section" id="gameSection">
-      <h2>มินิเกมจับคู่คำศัพท์</h2>
-      <div style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px;">คลิกจับคู่ตัวอักษรจีนกับคำแปลภาษาไทยให้ถูกต้อง</div>
+      <h2>词语连线小游戏</h2>
+      <div style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px;">点击匹配正确的中文与泰文释义</div>
       <div class="game-grid" id="gameGrid"></div>
-      <button onclick="toggleGameSection()" style="margin-top: 20px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">ปิดเกมและไปฝึกพูด</button>
+      <button onclick="toggleGameSection()" style="margin-top: 20px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">关闭游戏并返回口语练习</button>
     </div>
 
     <div class="app-card" id="appCard">
-      <h1>ระบบฝึกพูดภาษาจีน</h1>
-      <div class="subtitle">ฝึกทักษะการแปลความหมายและออกเสียง</div>
-
-      <div class="mode-selector">
-        <button class="btn-mode active" id="btnModeThaiToChina" onclick="switchMode('th-zh')">🇹🇭 ครูพิมพ์ไทย ➔ เด็กพูดจีน</button>
-        <button class="btn-mode" id="btnModeChinaToThai" onclick="switchMode('zh-th')">🇨🇳 ครูพิมพ์จีน ➔ เด็กพูดไทย</button>
-      </div>
+      <h1>中文口语训练系统</h1>
+      <div class="subtitle">沉浸式语音识别与发音训练</div>
 
       <div class="public-target-box">
-        <label id="inputLabel">พิมพ์ประโยคคำตอบภาษาจีนที่ถูกต้อง</label>
-        <input type="text" id="targetInput" value="今天老师很漂亮" placeholder="พิมพ์ประโยคที่เด็กต้องพูด...">
-        <button onclick="setCustomTarget()">บันทึกและเปลี่ยนโจทย์</button>
+        <label>设置练习目标 (请输入简体中文)</label>
+        <input type="text" id="targetInput" value="今天老师很漂亮" placeholder="请输入要练习的中文句子...">
+        <button onclick="setCustomTarget()">保存并更新目标</button>
       </div>
 
       <div class="teacher-box" id="teacherBox">
-        <label>ตั้งค่าคำศัพท์สำหรับมินิเกมจับคู่ (รูปแบบ: จีน|ไทย คั่นด้วยบรรทัดใหม่)</label>
+        <label>设置小游戏词汇对 (格式: 中文|泰文，每行一对)</label>
         <textarea id="customPairsInput">你好|สวัสดี
 老师|คุณครู
 学生|นักเรียน
 谢谢|ขอบคุณ</textarea>
-        <button onclick="saveCustomPairs()">อัปเดตคำศัพท์ในมินิเกม</button>
+        <button onclick="saveCustomPairs()">更新小游戏词库</button>
       </div>
 
       <div class="target-box">
-        <div style="font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;" id="displayLabel">โจทย์ (สิ่งที่ครูต้องการให้พูด)</div>
+        <div style="font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;">当前练习目标</div>
         <div class="prompt-text" id="targetDisplay">今天老师很漂亮</div>
-        <div class="prompt-hint" id="displayHint">(นักเรียนพูดออกเสียงประโยคจีนตามด้านบน)</div>
+        <div class="prompt-hint">(请跟着上方目标进行中文语音朗读)</div>
       </div>
 
-      <button class="btn-mic" id="micBtn" onclick="toggleListening()">เริ่มบันทึกเสียง</button>
+      <button class="btn-mic" id="micBtn" onclick="toggleListening()">开始录音</button>
 
-      <div class="result-box" id="resultText">คลิกปุ่มเพื่อเริ่มบันทึกเสียงพูดตามโจทย์</div>
+      <div class="result-box" id="resultText">点击按钮开始语音识别</div>
       
       <div class="reveal-box" id="revealBox">
-        <div class="success-title">เยี่ยมมาก! ผ่านแล้ว (+1 ดาว)</div>
-        <div class="meaning" id="targetMeaningDisplay" style="font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.9); margin-top: 4px;">โจทย์: 今天老师很漂亮</div>
-        <button style="margin-top: 14px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; font-family: inherit; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'" onclick="speakTarget()">ฟังเสียงตัวอย่าง</button>
+        <div class="success-title">太棒了！回答正确 (+1 星)</div>
+        <div class="meaning" id="targetMeaningDisplay" style="font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.9); margin-top: 4px;">目标: 今天老师很漂亮</div>
+        <button style="margin-top: 14px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; font-family: inherit; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'" onclick="speakTarget()">听标准发音</button>
       </div>
 
       <div class="error-box" id="errorBox">
-        ยังไม่ถูกต้อง ลองพูดใหม่อีกครั้งนะ!
+        语音识别未匹配，请再试一次！
       </div>
     </div>
 
@@ -449,7 +422,6 @@
 </main>
 
 <script>
-  let currentMode = 'th-zh';
   let targetText = "今天老师很漂亮";
   let isListening = false;
   let totalScore = 0;
@@ -466,53 +438,19 @@
 
   let selectedTile = null;
 
-  function switchMode(mode) {
-    currentMode = mode;
-    const btnThai = document.getElementById('btnModeThaiToChina');
-    const btnChina = document.getElementById('btnModeChinaToThai');
-    const inputLabel = document.getElementById('inputLabel');
-    const targetInput = document.getElementById('targetInput');
-    const displayLabel = document.getElementById('displayLabel');
-    const displayHint = document.getElementById('displayHint');
-
-    if (mode === 'th-zh') {
-      btnThai.classList.add('active');
-      btnChina.classList.remove('active');
-      inputLabel.innerText = "พิมพ์ประโยคคำตอบภาษาจีนที่ถูกต้อง";
-      targetInput.value = "今天老师很漂亮";
-      targetInput.placeholder = "พิมพ์ประโยคภาษาจีนที่เด็กต้องพูด...";
-      displayLabel.innerText = "โจทย์ (สิ่งที่ครูต้องการให้พูด)";
-      displayHint.innerText = "(นักเรียนพูดออกเสียงประโยคจีนตามด้านบน)";
-      targetText = "今天老师很漂亮";
-    } else {
-      btnChina.classList.add('active');
-      btnThai.classList.remove('active');
-      inputLabel.innerText = "พิมพ์ประโยคคำตอบภาษาไทยที่ถูกต้อง";
-      targetInput.value = "วันนี้ครูสวยมาก";
-      targetInput.placeholder = "พิมพ์ความหมายภาษาไทยที่เด็กต้องพูด...";
-      displayLabel.innerText = "โจทย์ (สิ่งที่ครูต้องการให้พูด)";
-      displayHint.innerText = "(นักเรียนพูดแปลเป็นภาษาไทยตามด้านบน)";
-      targetText = "วันนี้ครูสวยมาก";
-    }
-    document.getElementById('targetDisplay').innerText = targetInput.value;
-    document.getElementById('revealBox').style.display = 'none';
-    document.getElementById('errorBox').style.display = 'none';
-    document.getElementById('resultText').innerText = 'พร้อมสำหรับฝึกพูดแล้ว';
-  }
-
   function toggleTeacherMode() {
-    const password = prompt("กรุณากรอกรหัสผ่านสำหรับคุณครู (PIN: 123):");
+    const password = prompt("请输入教师密码 (PIN: 123):");
     if (password === TEACHER_PASSWORD) {
       const teacherBox = document.getElementById('teacherBox');
       if (teacherBox.style.display === 'block') {
         teacherBox.style.display = 'none';
-        alert("ออกจากโหมดคุณครูแล้ว");
+        alert("已退出教师模式");
       } else {
         teacherBox.style.display = 'block';
-        alert("เข้าสู่โหมดคุณครูสำเร็จ!");
+        alert("成功进入教师模式！");
       }
     } else if (password !== null) {
-      alert("รหัสผ่านไม่ถูกต้อง!");
+      alert("密码错误！");
     }
   }
 
@@ -559,7 +497,7 @@
       selectedTile = { card, tileData };
       card.classList.add('selected');
     } else {
-      if (selectedTile.tileData.pairId === tileData.tileData.pairId && selectedTile.tileData.type !== tileData.type) {
+      if (selectedTile.tileData.pairId === tileData.pairId && selectedTile.tileData.type !== tileData.type) {
         card.classList.add('matched');
         selectedTile.card.classList.add('matched');
         selectedTile.card.classList.remove('selected');
@@ -572,7 +510,7 @@
             totalScore += 2;
             document.getElementById('scoreCount').innerText = totalScore;
             triggerCelebration();
-            alert("ยอดเยี่ยม! จับคู่คำศัพท์ถูกต้องทั้งหมด รับไปเลย +2 ดาว!");
+            alert("太棒了！全部匹配正确，获得 +2 颗星！");
             toggleGameSection();
           }, 300);
         }
@@ -601,10 +539,10 @@
 
     if (newPairs.length > 0) {
       vocabPairs = newPairs;
-      alert("อัปเดตคำศัพท์สำหรับมินิเกมเรียบร้อยแล้ว!");
+      alert("小游戏词库更新成功！");
       document.getElementById('teacherBox').style.display = 'none';
     } else {
-      alert("รูปแบบไม่ถูกต้อง กรุณาใช้รูปแบบ จีน|ไทย ในแต่ละบรรทัด");
+      alert("格式错误，请使用 中文|泰文 格式，每行一对");
     }
   }
 
@@ -615,20 +553,29 @@
     recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
+    recognition.lang = 'zh-CN'; // 强制设定为简体中文语音识别
 
     recognition.onresult = function(event) {
       const spokenText = event.results[0][0].transcript;
-      document.getElementById('resultText').innerHTML = `ระบบได้ยิน: <b style="color:#38bdf8">${spokenText}</b>`;
+      document.getElementById('resultText').innerHTML = `系统识别到: <b style="color:#38bdf8">${spokenText}</b>`;
       
-      const cleanTarget = targetText.replace(/[\s\p{P}\p{S}]/gu, "").trim().toLowerCase();
-      const cleanSpoken = spokenText.replace(/[\s\p{P}\p{S}]/gu, "").trim().toLowerCase();
+      // 清除空格、标点符号，只保留纯中文汉字进行比对
+      const cleanTarget = targetText.replace(/[\s\p{P}\p{S}]/gu, "").trim();
+      const cleanSpoken = spokenText.replace(/[\s\p{P}\p{S}]/gu, "").trim();
 
-      // เงื่อนไขแบบผ่อนปรนมาก: ขอแค่มีคำหลักตรงกัน หรือระบบได้ยินตัวอักษรความยาวตั้งแต่ 1 ตัวขึ้นไปที่ตรงกับโจทย์ ให้ผ่านทันที
-      const isMatch = cleanSpoken.includes(cleanTarget) || 
-                      cleanTarget.includes(cleanSpoken) || 
-                      (cleanTarget.length > 0 && cleanSpoken.length > 0 && cleanSpoken[0] === cleanTarget[0]);
+      // [核心判定]: 只要学生พูดถูกคำสำคัญในประโยค (หรือมีอักษรที่ตรงกับโจทย์เกิน 50% หรือประกอบด้วยคำหลักสำคัญ) ก็ให้ผ่านทันทีโดยไม่ซีเรื่องสำเนียงหรือการเว้นวรรค
+      let matchedCount = 0;
+      for (let char of cleanTarget) {
+        if (cleanSpoken.includes(char)) {
+          matchedCount++;
+        }
+      }
 
-      if (isMatch || cleanSpoken.length > 0) { // หากไมค์จับเสียงพูดได้ จะถือว่ามีความพยายามและให้ผ่านรับดาวทันทีเพื่อความลื่นไหลในห้องเรียน
+      // หากมีตัวอักษรตรงกันมากกว่าครึ่งหนึ่งของโจทย์ หรือพูดตรงกันเป๊ะ ให้ถือว่าผ่าน
+      const isMatch = (cleanSpoken.includes(cleanTarget)) || 
+                      (cleanTarget.length > 0 && (matchedCount / cleanTarget.length >= 0.5));
+
+      if (isMatch) {
         triggerSuccess();
       } else {
         document.getElementById('revealBox').style.display = 'none';
@@ -639,11 +586,11 @@
     recognition.onend = function() {
       isListening = false;
       const btn = document.getElementById('micBtn');
-      btn.innerText = 'เริ่มบันทึกเสียง';
+      btn.innerText = '开始录音';
       btn.classList.remove('listening');
     };
   } else {
-    alert("เบราว์เซอร์นี้ไม่รองรับการแปลงเสียงพูด แนะนำให้ใช้ Google Chrome ครับ");
+    alert("您的浏览器不支持语音识别功能，建议使用 Google Chrome 浏览器。");
   }
 
   function triggerSuccess() {
@@ -660,7 +607,6 @@
     }
   }
 
-  // ฟังก์ชันช่วยกดผ่านฉุกเฉิน (กรณีคุณครูคลิกที่กล่องคะแนนดาว)
   function forcePass() {
     triggerSuccess();
   }
@@ -713,7 +659,7 @@
   function setCustomTarget() {
     const inputVal = document.getElementById('targetInput').value.trim();
     if (inputVal === "") {
-      alert("กรุณากรอกประโยคโจทย์ให้เรียบร้อย");
+      alert("请输入有效的练习目标");
       return;
     }
 
@@ -721,28 +667,28 @@
     hasScoredForCurrent = false;
 
     document.getElementById('targetDisplay').innerText = targetText;
-    document.getElementById('targetMeaningDisplay').innerText = "โจทย์: " + targetText;
+    document.getElementById('targetMeaningDisplay').innerText = "目标: " + targetText;
     
     document.getElementById('revealBox').style.display = 'none';
     document.getElementById('errorBox').style.display = 'none';
-    document.getElementById('resultText').innerText = 'อัปเดตโจทย์เรียบร้อย พร้อมให้นักเรียนฝึกพูด';
+    document.getElementById('resultText').innerText = '目标更新成功，请开始练习口语';
   }
 
   function toggleListening() {
     if (!recognition) return;
     
-    recognition.lang = (currentMode === 'th-zh') ? 'zh-CN' : 'th-TH';
+    recognition.lang = 'zh-CN';
 
     const btn = document.getElementById('micBtn');
     
     if (!isListening) {
       recognition.start();
       isListening = true;
-      btn.innerText = 'กำลังฟังเสียง...';
+      btn.innerText = '正在收听语音...';
       btn.classList.add('listening');
       document.getElementById('revealBox').style.display = 'none';
       document.getElementById('errorBox').style.display = 'none';
-      document.getElementById('resultText').innerText = 'กำลังฟังเสียงพูดของคุณ...';
+      document.getElementById('resultText').innerText = '请说话...';
     } else {
       recognition.stop();
     }
@@ -750,7 +696,7 @@
 
   function speakTarget() {
     const utterance = new SpeechSynthesisUtterance(targetText);
-    utterance.lang = (currentMode === 'th-zh') ? 'zh-CN' : 'th-TH';
+    utterance.lang = 'zh-CN';
     window.speechSynthesis.speak(utterance);
   }
 </script>
