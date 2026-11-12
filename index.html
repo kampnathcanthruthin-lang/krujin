@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Final Fixed Edition</title>
+  <title>ระบบฝึกพูดภาษาจีน - Simple & Accurate</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -459,18 +459,16 @@
 
   const TEACHER_PASSWORD = "123";
 
-  // พจนานุกรมแปลจีนตัวย่อเป็นไทย (ครอบคลุมคำศัพท์ทั่วไป)
+  // พจนานุกรมแปลคำศัพท์พื้นฐาน
   const cnToThDict = {
     "今天": ["วันนี้"],
     "老师": ["คุณครู", "ครู"],
     "学生": ["นักเรียน"],
     "谢谢": ["ขอบคุณ"],
     "很": ["มาก"],
-    "漂亮": ["สวย", "งดงาม"],
+    "漂亮": ["สวย"],
     "你": ["คุณ", "เธอ"],
-    "好": ["ดี", "สวัสดี"],
-    "中国": ["จีน"],
-    "泰": ["ไทย"]
+    "好": ["ดี", "สวัสดี"]
   };
 
   let vocabPairs = [
@@ -576,7 +574,7 @@
       selectedTile = { card, tileData };
       card.classList.add('selected');
     } else {
-      if (selectedTile.tileData.pairId === tileData.pairId && selectedTile.tileData.type !== tileData.type) {
+      if (selectedTile.tileData.pairId === tileData.tileData.pairId && selectedTile.tileData.type !== tileData.type) {
         card.classList.add('matched');
         selectedTile.card.classList.add('matched');
         selectedTile.card.classList.remove('selected');
@@ -641,35 +639,22 @@
       let isMatch = false;
 
       if (currentMode === 'zh-th') {
-        // [โหมดพิมพ์จีน ➔ เด็กพูดไทย]: ตรวจสอบคำแปลภาษาไทยเทียบกับพจนานุกรมจีน-ไทย
-        let expectedMeanings = [];
-        
-        // ค้นหาคำศัพท์ในพจนานุกรมจากโจทย์จีนที่คุณครูพิมพ์
-        for (let cnWord in cnToThDict) {
-          if (targetChinese.includes(cnWord)) {
-            expectedMeanings.push(...cnToThDict[cnWord]);
-          }
-        }
-        
-        // หากพิมพ์คำศัพท์ทั่วไปที่ไม่อยู่ในพจนานุกรม ให้รองรับการเทียบเคียงพื้นฐาน
-        if (expectedMeanings.length === 0) {
-          expectedMeanings.push(promptDisplay.toLowerCase());
+        // [โหมดพิมพ์จีน ➔ พูดไทย]: ดึงคำแปลจากพจนานุกรม หรือถ้าไม่มีให้ใช้ตัวโจทย์เทียบเคียง
+        let validMeanings = [];
+        if (cnToThDict[targetChinese]) {
+          validMeanings = cnToThDict[targetChinese];
+        } else {
+          validMeanings = [promptDisplay.toLowerCase()];
         }
 
-        // ตรวจสอบว่าสิ่งที่เด็กพูด (เช่น "วันนี้") มีความหมายตรงกับที่คาดหวังไว้หรือไม่
-        isMatch = expectedMeanings.some(meaning => cleanSpoken.includes(meaning.toLowerCase())) ||
-                  cleanSpoken.includes("วัน") || cleanSpoken.includes("นี้");
+        // ขอแค่เสียงที่พูด (เช่น "วันนี้") ตรงกับความหมายที่ถูกต้อง ให้ผ่านทันที
+        isMatch = validMeanings.some(m => cleanSpoken.includes(m.toLowerCase())) || 
+                  cleanSpoken.includes(promptDisplay.toLowerCase());
 
       } else {
-        // [โหมดพิมพ์ไทย ➔ เด็กพูดจีน]: ตรวจสอบตัวอักษรจีน
+        // [โหมดพิมพ์ไทย ➔ พูดจีน]: เทียบตัวอักษรจีนแบบตรงไปตรงมา
         const cleanTarget = targetChinese.replace(/[\s\p{P}\p{S}]/gu, "").trim();
-        let matchedChars = 0;
-        for (let char of cleanTarget) {
-          if (cleanSpoken.includes(char)) {
-            matchedChars++;
-          }
-        }
-        isMatch = (cleanSpoken.includes(cleanTarget)) || (cleanTarget.length > 0 && (matchedChars / cleanTarget.length >= 0.5));
+        isMatch = cleanSpoken.includes(cleanTarget);
       }
 
       if (isMatch) {
