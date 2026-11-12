@@ -3,13 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Perfect Balance Matching</title>
+  <title>ระบบฝึกพูดภาษาจีน - Ultimate Classroom Edition</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    /* Liquid Glass Effect */
     .liquid-glass {
       background: rgba(18, 18, 22, 0.4);
       background-blend-mode: luminosity;
@@ -106,6 +105,7 @@
       margin-bottom: 20px;
       backdrop-filter: blur(10px);
       letter-spacing: 0.05em;
+      cursor: pointer;
     }
 
     .app-card {
@@ -291,7 +291,7 @@
     .btn-mic:hover { transform: scale(1.01); background: #f8fafc; box-shadow: 0 15px 30px rgba(255,255,255,0.15); }
     .btn-mic.listening { background: #ef4444; color: #fff; animation: pulse 1.5s infinite; }
 
-    .result-box { margin-top: 16px; font-size: 14px; color: rgba(255,255,255,0.5); min-height: 24px; font-weight: 400; }
+    .result-box { margin-top: 16px; font-size: 14px; color: rgba(255,255,255,0.7); min-height: 24px; font-weight: 500; }
 
     .game-section {
       display: none;
@@ -372,8 +372,9 @@
       <button class="btn-top" onclick="toggleTeacherMode()">โหมดคุณครู</button>
     </div>
 
-    <div class="score-badge">
-      <span>คะแนนสะสม:</span>
+    <!-- คลิกที่คะแนนดาวเพื่อช่วยกดผ่านให้เด็กกรณีฉุกเฉินได้ -->
+    <div class="score-badge" onclick="forcePass()" title="คลิกเพื่อช่วยกดผ่านให้นักเรียน">
+      <span>⭐ คะแนนสะสม (คลิกช่วยผ่าน):</span>
       <span id="scoreCount" style="color: #fbbf24; font-weight: 700; font-size: 15px;">0</span>
       <span>ดาว</span>
     </div>
@@ -395,8 +396,8 @@
       </div>
 
       <div class="public-target-box">
-        <label id="inputLabel">พิมพ์โจทย์ภาษาไทย (เช่น วันนี้ครูสวยมาก)</label>
-        <input type="text" id="targetInput" value="วันนี้ครูสวยมาก" placeholder="พิมพ์ประโยคโจทย์ที่นี่...">
+        <label id="inputLabel">พิมพ์ประโยคคำตอบภาษาจีนที่ถูกต้อง</label>
+        <input type="text" id="targetInput" value="今天老师很漂亮" placeholder="พิมพ์ประโยคที่เด็กต้องพูด...">
         <button onclick="setCustomTarget()">บันทึกและเปลี่ยนโจทย์</button>
       </div>
 
@@ -410,9 +411,9 @@
       </div>
 
       <div class="target-box">
-        <div style="font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;" id="displayLabel">โจทย์ (ภาษาไทย)</div>
-        <div class="prompt-text" id="targetDisplay">วันนี้ครูสวยมาก</div>
-        <div class="prompt-hint" id="displayHint">(นักเรียนต้องพูดเป็นภาษาจีนตามความหมายด้านบน)</div>
+        <div style="font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;" id="displayLabel">โจทย์ (สิ่งที่ครูต้องการให้พูด)</div>
+        <div class="prompt-text" id="targetDisplay">今天老师很漂亮</div>
+        <div class="prompt-hint" id="displayHint">(นักเรียนพูดออกเสียงประโยคจีนตามด้านบน)</div>
       </div>
 
       <button class="btn-mic" id="micBtn" onclick="toggleListening()">เริ่มบันทึกเสียง</button>
@@ -420,13 +421,13 @@
       <div class="result-box" id="resultText">คลิกปุ่มเพื่อเริ่มบันทึกเสียงพูดตามโจทย์</div>
       
       <div class="reveal-box" id="revealBox">
-        <div class="success-title">ออกเสียงถูกต้อง (+1 ดาว)</div>
-        <div class="meaning" id="targetMeaningDisplay" style="font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.9); margin-top: 4px;">โจทย์: วันนี้ครูสวยมาก</div>
+        <div class="success-title">เยี่ยมมาก! ผ่านแล้ว (+1 ดาว)</div>
+        <div class="meaning" id="targetMeaningDisplay" style="font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.9); margin-top: 4px;">โจทย์: 今天老师很漂亮</div>
         <button style="margin-top: 14px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; font-family: inherit; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'" onclick="speakTarget()">ฟังเสียงตัวอย่าง</button>
       </div>
 
       <div class="error-box" id="errorBox">
-        การออกเสียงยังไม่ถูกต้อง ลองใหม่อีกครั้ง
+        ยังไม่ถูกต้อง ลองพูดใหม่อีกครั้งนะ!
       </div>
     </div>
 
@@ -496,6 +497,7 @@
     document.getElementById('targetDisplay').innerText = targetInput.value;
     document.getElementById('revealBox').style.display = 'none';
     document.getElementById('errorBox').style.display = 'none';
+    document.getElementById('resultText').innerText = 'พร้อมสำหรับฝึกพูดแล้ว';
   }
 
   function toggleTeacherMode() {
@@ -621,23 +623,13 @@
       const cleanTarget = targetText.replace(/[\s\p{P}\p{S}]/gu, "").trim().toLowerCase();
       const cleanSpoken = spokenText.replace(/[\s\p{P}\p{S}]/gu, "").trim().toLowerCase();
 
-      // [ปรับลดความเข้มงวดให้พอดี]: ใช้การเช็กแบบยืดหยุ่น ขอแค่มีคำหลักหรือข้อความตรงกันบางส่วน (Substring Match) ก็ให้ผ่าน
-      const isMatch = cleanSpoken === cleanTarget || 
-                      (cleanTarget.length > 1 && cleanSpoken.includes(cleanTarget)) || 
-                      (cleanSpoken.length > 1 && cleanTarget.includes(cleanSpoken));
+      // เงื่อนไขแบบผ่อนปรนมาก: ขอแค่มีคำหลักตรงกัน หรือระบบได้ยินตัวอักษรความยาวตั้งแต่ 1 ตัวขึ้นไปที่ตรงกับโจทย์ ให้ผ่านทันที
+      const isMatch = cleanSpoken.includes(cleanTarget) || 
+                      cleanTarget.includes(cleanSpoken) || 
+                      (cleanTarget.length > 0 && cleanSpoken.length > 0 && cleanSpoken[0] === cleanTarget[0]);
 
-      if (isMatch) {
-        document.getElementById('revealBox').style.display = 'block';
-        document.getElementById('errorBox').style.display = 'none';
-        document.getElementById('resultText').innerText = '';
-
-        if (!hasScoredForCurrent) {
-          totalScore += 1;
-          document.getElementById('scoreCount').innerText = totalScore;
-          hasScoredForCurrent = true;
-          triggerCelebration();
-          playSuccessChime();
-        }
+      if (isMatch || cleanSpoken.length > 0) { // หากไมค์จับเสียงพูดได้ จะถือว่ามีความพยายามและให้ผ่านรับดาวทันทีเพื่อความลื่นไหลในห้องเรียน
+        triggerSuccess();
       } else {
         document.getElementById('revealBox').style.display = 'none';
         document.getElementById('errorBox').style.display = 'block';
@@ -652,6 +644,25 @@
     };
   } else {
     alert("เบราว์เซอร์นี้ไม่รองรับการแปลงเสียงพูด แนะนำให้ใช้ Google Chrome ครับ");
+  }
+
+  function triggerSuccess() {
+    document.getElementById('revealBox').style.display = 'block';
+    document.getElementById('errorBox').style.display = 'none';
+    document.getElementById('resultText').innerText = '';
+
+    if (!hasScoredForCurrent) {
+      totalScore += 1;
+      document.getElementById('scoreCount').innerText = totalScore;
+      hasScoredForCurrent = true;
+      triggerCelebration();
+      playSuccessChime();
+    }
+  }
+
+  // ฟังก์ชันช่วยกดผ่านฉุกเฉิน (กรณีคุณครูคลิกที่กล่องคะแนนดาว)
+  function forcePass() {
+    triggerSuccess();
   }
 
   function triggerCelebration() {
