@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Thai Prompt to Chinese Speech</title>
+  <title>ระบบฝึกพูดภาษาจีน - Unified Input</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -137,7 +137,7 @@
     h1 { color: #fff; font-size: 26px; margin-bottom: 6px; font-weight: 600; letter-spacing: -0.01em; }
     .subtitle { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 28px; font-weight: 400; letter-spacing: 0.02em; }
 
-    /* กล่องตั้งค่าโจทย์ภาษาไทยและจีนบนหน้าจอหลัก */
+    /* กล่องตั้งค่าโจทย์ช่องเดียว (ไทย | จีน) */
     .public-target-box {
       background: rgba(255, 255, 255, 0.02);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -149,7 +149,7 @@
     .public-target-box label { font-weight: 500; color: rgba(255, 255, 255, 0.7); font-size: 12px; display: block; margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase; }
     .public-target-box input {
       width: 100%;
-      padding: 10px 14px;
+      padding: 12px 14px;
       font-size: 15px;
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 10px;
@@ -158,7 +158,7 @@
       outline: none;
       box-sizing: border-box;
       font-family: inherit;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .public-target-box button {
       background: #4ade80;
@@ -371,14 +371,10 @@
       <h1>ระบบฝึกพูดภาษาจีน</h1>
       <div class="subtitle">ฝึกทักษะการแปลความหมายและออกเสียงภาษาจีน</div>
 
-      <!-- กล่องตั้งค่าโจทย์ (พิมพ์ไทยเพื่อให้นักเรียนพูดจีนตาม) -->
+      <!-- กล่องตั้งค่าโจทย์แบบช่องเดียว (รูปแบบ: ความหมายไทย | ประโยคจีน) -->
       <div class="public-target-box">
-        <label>1. พิมพ์ความหมายภาษาไทย (โจทย์สำหรับนักเรียน)</label>
-        <input type="text" id="customThaiPrompt" value="คุณครูใจดีมากวันนี้" placeholder="เช่น คุณครูใจดีมากวันนี้">
-        
-        <label>2. พิมพ์ประโยคภาษาจีนที่ถูกต้อง (สำหรับตรวจคำตอบและฟังเสียง)</label>
-        <input type="text" id="customChineseTarget" value="今天老师很好。" placeholder="เช่น 今天老师很好。">
-        
+        <label>ตั้งค่าโจทย์ (พิมพ์ความหมายไทย | ประโยคจีน)</label>
+        <input type="text" id="unifiedInput" value="คุณครูใจดีมากวันนี้ | 今天老师很好。" placeholder="เช่น คุณครูใจดีมากวันนี้ | 今天老师很好。">
         <button onclick="setCustomTarget()">บันทึกและเปลี่ยนโจทย์</button>
       </div>
 
@@ -646,16 +642,23 @@
   }
 
   function setCustomTarget() {
-    const thaiInput = document.getElementById('customThaiPrompt').value.trim();
-    const chineseInput = document.getElementById('customChineseTarget').value.trim();
-    
-    if (thaiInput === "" || chineseInput === "") {
-      alert("กรุณากรอกทั้งความหมายภาษาไทยและประโยคภาษาจีนให้ครบถ้วน");
+    const inputVal = document.getElementById('unifiedInput').value.trim();
+    if (!inputVal.includes('|')) {
+      alert("กรุณากรอกในรูปแบบ: ความหมายไทย | ประโยคจีน\nตัวอย่าง: คุณครูใจดีมากวันนี้ | 今天老师很好。");
       return;
     }
 
-    targetThai = thaiInput;
-    targetChinese = chineseInput;
+    const parts = inputVal.split('|');
+    const thaiPart = parts[0].trim();
+    const chinesePart = parts[1].trim();
+
+    if (thaiPart === "" || chinesePart === "") {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วนทั้งภาษาไทยและภาษาจีน");
+      return;
+    }
+
+    targetThai = thaiPart;
+    targetChinese = chinesePart;
     hasScoredForCurrent = false;
 
     document.getElementById('targetThaiDisplay').innerText = targetThai;
