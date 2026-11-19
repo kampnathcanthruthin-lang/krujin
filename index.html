@@ -34,7 +34,7 @@ h1{font-size:1.2rem;margin:0}.score{color:var(--mute);font-size:.92rem;font-weig
 @keyframes pulse{50%{box-shadow:0 0 0 14px rgba(181,55,43,.2)}}
 @media(prefers-reduced-motion:reduce){.mic.on{animation:none}}
 button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #3b82f6;outline-offset:2px}
-.status{text-align:center;min-height:3.4em;margin:0}.heard{color:var(--mute);font-size:.9rem}
+.status{text-align:center;min-height:3.6em;margin:0}.heard{color:var(--mute);font-size:.9rem}
 .verdict{font-weight:700;font-size:1.1rem}.verdict.ok{color:var(--ok)}.verdict.no{color:var(--no)}
 .nav{display:flex;gap:10px;margin-top:16px}
 .nav button{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;font-weight:600}
@@ -73,8 +73,8 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
     <button data-m="zh2th" aria-pressed="false">ดูจีน พูดไทย</button>
   </div>
   <div class="seg" id="levels" role="group" aria-label="ระดับความเข้มงวด">
-    <button data-t="0.5" aria-pressed="false">ผ่อนปรน</button>
-    <button data-t="0.7" aria-pressed="true">ปานกลาง</button>
+    <button data-t="0.65" aria-pressed="false">ผ่อนปรน</button>
+    <button data-t="0.82" aria-pressed="true">ปานกลาง</button>
     <button data-t="1" aria-pressed="false">เข้ม</button>
   </div>
   <div class="bar" aria-hidden="true"><span id="barfill"></span></div>
@@ -145,13 +145,12 @@ const DEFAULT_WORDS = [
 const KEY = "zh-words-v2";
 const KEY_API = "zh-gemini-key";
 let WORDS = DEFAULT_WORDS;
-let pool = [], i = 0, mode = "zh", threshold = 0.7, right = 0, total = 0, streak = 0, listening = false, revealed = false;
+let pool = [], i = 0, mode = "zh", threshold = 0.82, right = 0, total = 0, streak = 0, listening = false, revealed = false;
 
 const $ = id => document.getElementById(id);
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const NEED = {zh: w => w.hanzi, th2zh: w => w.hanzi && w.th, zh2th: w => w.hanzi && w.th};
 
-// โหลดข้อมูลจาก URL (กรณีครูแชร์ลิงก์) หรือจาก localStorage
 (function initData(){
   try{
     const params = new URLSearchParams(location.search);
@@ -170,24 +169,39 @@ const NEED = {zh: w => w.hanzi, th2zh: w => w.hanzi && w.th, zh2th: w => w.hanzi
   try{ $("apikey").value = localStorage.getItem(KEY_API) || ""; }catch(e){}
 })();
 
-const clean = (s, thai) => (s || "").replace(thai ? /[^\u0e00-\u0e7f]/g : /[^\u4e00-\u9fff]/g, "");
+const clean = (s, thai) => (s || "").replace(thai ? /[^฀-๿]/g : /[^一-鿿]/g, "");
 
+// คำนวณความคล้ายแบบเข้มงวด: หารด้วยความยาวที่มากกว่า (Math.max) เพื่อป้องกันการพูดไม่ครบประโยคแล้วผ่าน
 function sim(a, b){
   if(!a || !b) return 0;
   const dp = Array.from({length:a.length+1}, () => Array(b.length+1).fill(0));
   for(let x=1;x<=a.length;x++) for(let y=1;y<=b.length;y++)
     dp[x][y] = a[x-1]===b[y-1] ? dp[x-1][y-1]+1 : Math.max(dp[x-1][y], dp[x][y-1]);
-  return dp[a.length][b.length] / a.length;
+  const lcs = dp[a.length][b.length];
+  return lcs / Math.max(a.length, b.length);
+}
+
+// ปรับเกณฑ์อัตโนมัติตามความยาวคำ: คำสั้น 1-2 พยางค์ผ่อนปรนเล็กน้อย ประโยค 3 พยางค์ขึ้นไปต้องพูดให้ครบ
+function getEffectiveThreshold(targetLen){
+  if(threshold >= 1) return 1;
+  if(targetLen <= 2) return Math.max(0.5, threshold - 0.12);
+  return threshold;
 }
 
 function judge(cands){
   const w = pool[i], thai = mode === "zh2th";
   const targets = (thai ? (w.th || "").split(/[\/,]/) : [w.hanzi].concat(w.alt || []))
     .map(x => clean(x, thai)).filter(Boolean);
-  let best = 0;
-  for(const h of cands.map(x => clean(x, thai)))
-    for(const t of targets){ if(h === t) return {ok:true, heard:h}; best = Math.max(best, sim(t, h)); }
-  return {ok: best >= threshold, heard: clean(cands[0], thai)};
+  let best = 0, bestTargetLen = targets[0]?.length || 1;
+  for(const h of cands.map(x => clean(x, thai))){
+    for(const t of targets){
+      if(h === t) return {ok:true, heard:h, score:100};
+      const s = sim(t, h);
+      if(s > best){ best = s; bestTargetLen = t.length; }
+    }
+  }
+  const req = getEffectiveThreshold(bestTargetLen);
+  return {ok: best >= req, heard: clean(cands[0], thai), score: Math.round(best * 100)};
 }
 
 function setModeUI(m){
@@ -248,7 +262,7 @@ function listen(){
   r.onresult = e => {
     const res = judge([...e.results[0]].map(a => a.transcript));
     $("card").className = "card " + (res.ok ? "ok" : "no");
-    $("status").innerHTML = `<span class="verdict ${res.ok?"ok":"no"}">${res.ok ? "✓ ถูกต้อง เก่งมาก!" : "ยังไม่ถูก ลองอีกครั้ง"}</span><br><span class="heard">ระบบได้ยินว่า: ${res.heard || "(ไม่ได้ยินเสียง)"}</span>`;
+    $("status").innerHTML = `<span class="verdict ${res.ok?"ok":"no"}">${res.ok ? `✓ ถูกต้อง เก่งมาก! (${res.score}%)` : `ยังไม่ครบ/ยังไม่ตรง (${res.score}%) ลองพูดให้ครบประโยค`}</span><br><span class="heard">ระบบได้ยินว่า: ${res.heard || "(ไม่ได้ยินเสียง)"}</span>`;
     total++; if(res.ok){ right++; streak++; revealed = true; draw(); } else streak = 0;
     $("score").textContent = `ถูก ${right} / ${total}` + (streak >= 2 ? ` 🔥${streak}` : "");
   };
@@ -267,18 +281,18 @@ document.querySelectorAll("#levels button").forEach(b => b.onclick = () => {
   threshold = +b.dataset.t;
 });
 
-/* ===== โหมดคุณครูอัจฉริยะ (พิมพ์อิสระ ไม่จำกัดรูปแบบ) ===== */
-const toText = ws => ws.map(w => [w.hanzi, w.pinyin, w.th, w.emoji].filter(Boolean).join(" | ")).join("\n");
+/* ===== โหมดคุณครูอัจฉริยะ ===== */
+const toText = ws => ws.map(w => [w.hanzi, w.pinyin, w.th, w.emoji].filter(Boolean).join(" | ")).join("
+");
 
-// แยกแยะอัตโนมัติว่าครูพิมพ์อะไรมา (ไทยล้วน, จีนล้วน, หรือมี | คั่น)
 function smartParse(text){
-  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const lines = text.split("
+").map(l => l.trim()).filter(Boolean);
   let thaiCount = 0, zhCount = 0;
   const items = lines.map(line => {
     if(line.includes("|")){
       const p = line.split("|").map(x => x.trim());
-      // เช็คว่าช่องแรกเป็นไทยหรือจีน
-      const firstIsZh = /[\u4e00-\u9fff]/.test(p[0]);
+      const firstIsZh = /[一-鿿]/.test(p[0]);
       if(firstIsZh){
         zhCount++;
         return {hanzi: p[0]||"", pinyin: p[1]||"", th: p[2]||"", emoji: p[3]||"💬", alt: (p[4]||"").split(/[,，\s]+/).filter(Boolean)};
@@ -287,9 +301,8 @@ function smartParse(text){
         return {hanzi: p[1]||"", pinyin: p[2]||"", th: p[0]||"", emoji: p[3]||"💬", alt: []};
       }
     }
-    // กรณีพิมพ์อิสระบรรทัดเดียว ไม่มีเครื่องหมาย |
-    const hasZh = /[\u4e00-\u9fff]/.test(line);
-    const hasTh = /[\u0e00-\u0e7f]/.test(line);
+    const hasZh = /[一-鿿]/.test(line);
+    const hasTh = /[฀-๿]/.test(line);
     if(hasZh && !hasTh){
       zhCount++;
       return {hanzi: line, pinyin: "", th: "", emoji: "🇨🇳", alt: []};
@@ -297,9 +310,8 @@ function smartParse(text){
       thaiCount++;
       return {hanzi: "", pinyin: "", th: line, emoji: "🇹🇭", alt: []};
     }else{
-      // พิมพ์ปนกันในบรรทัดเดียว เช่น "ฉันเป็นคนไทย 我是泰国人"
-      const zhPart = (line.match(/[\u4e00-\u9fff，。！？、]+/g) || []).join("");
-      const thPart = line.replace(/[\u4e00-\u9fff，。！？、]+/g, "").trim();
+      const zhPart = (line.match(/[一-鿿，。！？、]+/g) || []).join("");
+      const thPart = line.replace(/[一-鿿，。！？、]+/g, "").trim();
       thaiCount++;
       return {hanzi: zhPart, pinyin: "", th: thPart, emoji: "💬", alt: []};
     }
@@ -314,7 +326,6 @@ $("ttoggle").onclick = () => {
   if($("teacher").classList.toggle("open")) $("tarea").value = toText(WORDS);
 };
 
-// ฟังก์ชันแปลภาษาอัตโนมัติ (ใช้ Gemini API ถ้ามี Key หรือใช้ Free Translation API สำรอง)
 async function autoCompleteWords(items){
   const needWork = items.some(w => !w.hanzi || !w.th || !w.pinyin);
   if(!needWork) return items;
@@ -351,7 +362,6 @@ async function autoCompleteWords(items){
     }
   }
 
-  // ระบบสำรองกรณีไม่ใส่ API Key: ใช้ MyMemory Free Translation API แปล ไทย <-> จีน อัตโนมัติ
   const result = [];
   for(const w of items){
     let hanzi = w.hanzi, th = w.th;
@@ -388,7 +398,6 @@ $("save").onclick = async () => {
   let {items, detectedMode} = smartParse($("tarea").value);
   if(!items.length) return tmsg("ยังไม่มีโจทย์ กรุณาพิมพ์อย่างน้อย 1 บรรทัด", true);
 
-  // ถ้าครูพิมพ์มาแค่ภาษาเดียว ระบบจะแปลให้อัตโนมัติก่อนบันทึกทันที!
   if(items.some(w => !w.hanzi || !w.th)){
     tmsg("⏳ กำลังแปลประโยคให้อัตโนมัติก่อนเริ่ม...");
     items = await autoCompleteWords(items);
