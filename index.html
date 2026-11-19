@@ -41,7 +41,6 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
 .nav #shuffle{flex:0 0 auto}.nav #next{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 .warn{background:var(--nobg);border-radius:10px;padding:12px;margin-bottom:14px;display:none;font-size:.9rem}
 
-/* โหมดครู */
 .tbtn{display:block;margin:26px auto 0;background:none;border:0;color:var(--mute);font:inherit;font-size:.92rem;text-decoration:underline;cursor:pointer}
 .teacher{display:none;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
 .teacher.open{display:block}
@@ -102,7 +101,7 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
   <button class="tbtn" id="ttoggle">👩‍🏫 โหมดคุณครู: พิมพ์โจทย์ / สร้างชุดคำศัพท์เอง</button>
   <section class="teacher" id="teacher">
     <h2>กำหนดโจทย์ให้นักเรียน (พิมพ์อิสระ บรรทัดละ 1 ข้อ)</h2>
-    <p>คุณครูพิมพ์อะไรลงไปก็ได้เลย เช่น พิมพ์แค่ <b>ฉันเป็นคนไทย</b> หรือ <b>我是泰国人</b> หรือจะพิมพ์คู่กันก็ได้ ระบบจะแปลและเติมพินอินให้อัตโนมัติทันทีที่กดบันทึก!</p>
+    <p>คุณครูพิมพ์อะไรลงไปก็ได้เลย เช่น พิมพ์แค่ <b>ฉันเป็นคนไทย</b> หรือ <b>我是泰国人</b> หรือจะพิมพ์คู่กันก็ได้ ระบบจะแปลและเติมพินอินให้อัตโนมัติทันทีที่กดบันทึก</p>
     <textarea id="tarea" spellcheck="false" placeholder="ตัวอย่างการพิมพ์:&#10;ฉันเป็นคนไทย&#10;วันนี้อากาศดีมาก&#10;我想喝水&#10;ขอบคุณมาก | 谢谢你"></textarea>
 
     <div class="t-opt">
@@ -169,9 +168,10 @@ const NEED = {zh: w => w.hanzi, th2zh: w => w.hanzi && w.th, zh2th: w => w.hanzi
   try{ $("apikey").value = localStorage.getItem(KEY_API) || ""; }catch(e){}
 })();
 
-const clean = (s, thai) => (s || "").replace(thai ? /[^฀-๿]/g : /[^一-鿿]/g, "");
+const hasZhChar = s => /[\u4e00-\u9fff]/.test(s || "");
+const hasThChar = s => /[\u0e00-\u0e7f]/.test(s || "");
+const clean = (s, thai) => (s || "").replace(thai ? /[^\u0e00-\u0e7f]/g : /[^\u4e00-\u9fff]/g, "");
 
-// คำนวณความคล้ายแบบเข้มงวด: หารด้วยความยาวที่มากกว่า (Math.max) เพื่อป้องกันการพูดไม่ครบประโยคแล้วผ่าน
 function sim(a, b){
   if(!a || !b) return 0;
   const dp = Array.from({length:a.length+1}, () => Array(b.length+1).fill(0));
@@ -181,7 +181,6 @@ function sim(a, b){
   return lcs / Math.max(a.length, b.length);
 }
 
-// ปรับเกณฑ์อัตโนมัติตามความยาวคำ: คำสั้น 1-2 พยางค์ผ่อนปรนเล็กน้อย ประโยค 3 พยางค์ขึ้นไปต้องพูดให้ครบ
 function getEffectiveThreshold(targetLen){
   if(threshold >= 1) return 1;
   if(targetLen <= 2) return Math.max(0.5, threshold - 0.12);
@@ -281,19 +280,15 @@ document.querySelectorAll("#levels button").forEach(b => b.onclick = () => {
   threshold = +b.dataset.t;
 });
 
-/* ===== โหมดคุณครูอัจฉริยะ ===== */
-const toText = ws => ws.map(w => [w.hanzi, w.pinyin, w.th, w.emoji].filter(Boolean).join(" | ")).join("
-");
+const toText = ws => ws.map(w => [w.hanzi, w.pinyin, w.th, w.emoji].filter(Boolean).join(" | ")).join("\n");
 
 function smartParse(text){
-  const lines = text.split("
-").map(l => l.trim()).filter(Boolean);
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   let thaiCount = 0, zhCount = 0;
   const items = lines.map(line => {
     if(line.includes("|")){
       const p = line.split("|").map(x => x.trim());
-      const firstIsZh = /[一-鿿]/.test(p[0]);
-      if(firstIsZh){
+      if(hasZhChar(p[0])){
         zhCount++;
         return {hanzi: p[0]||"", pinyin: p[1]||"", th: p[2]||"", emoji: p[3]||"💬", alt: (p[4]||"").split(/[,，\s]+/).filter(Boolean)};
       }else{
@@ -301,17 +296,17 @@ function smartParse(text){
         return {hanzi: p[1]||"", pinyin: p[2]||"", th: p[0]||"", emoji: p[3]||"💬", alt: []};
       }
     }
-    const hasZh = /[一-鿿]/.test(line);
-    const hasTh = /[฀-๿]/.test(line);
-    if(hasZh && !hasTh){
+    const zh = hasZhChar(line);
+    const th = hasThChar(line);
+    if(zh && !th){
       zhCount++;
       return {hanzi: line, pinyin: "", th: "", emoji: "🇨🇳", alt: []};
-    }else if(hasTh && !hasZh){
+    }else if(th && !zh){
       thaiCount++;
       return {hanzi: "", pinyin: "", th: line, emoji: "🇹🇭", alt: []};
     }else{
-      const zhPart = (line.match(/[一-鿿，。！？、]+/g) || []).join("");
-      const thPart = line.replace(/[一-鿿，。！？、]+/g, "").trim();
+      const zhPart = (line.match(/[\u4e00-\u9fff，。！？、]+/g) || []).join("");
+      const thPart = line.replace(/[\u4e00-\u9fff，。！？、]+/g, "").trim();
       thaiCount++;
       return {hanzi: zhPart, pinyin: "", th: thPart, emoji: "💬", alt: []};
     }
@@ -381,6 +376,27 @@ async function autoCompleteWords(items){
   return result;
 }
 
+async function saveWords(){
+  let {items, detectedMode} = smartParse($("tarea").value);
+  if(!items.length){
+    tmsg("ยังไม่มีโจทย์ กรุณาพิมพ์อย่างน้อย 1 บรรทัด", true);
+    return false;
+  }
+  if(items.some(w => !w.hanzi || !w.th)){
+    tmsg("⏳ กำลังแปลประโยคให้อัตโนมัติก่อนเริ่ม...");
+    items = await autoCompleteWords(items);
+    $("tarea").value = toText(items);
+  }
+  WORDS = items;
+  try{ localStorage.setItem(KEY, JSON.stringify(WORDS)); }catch(e){}
+  const selMode = $("defmode").value;
+  const targetMode = selMode === "auto" ? detectedMode : selMode;
+  setModeUI(targetMode);
+  rebuild();
+  tmsg(`✓ บันทึกโจทย์ ${WORDS.length} ข้อแล้ว! โหมดปัจจุบัน: "${targetMode === 'th2zh' ? 'ดูไทย พูดจีน' : targetMode === 'zh2th' ? 'ดูจีน พูดไทย' : 'ดูจีน พูดจีน'}"`);
+  return true;
+}
+
 $("fill").onclick = async () => {
   const {items} = smartParse($("tarea").value);
   if(!items.length) return tmsg("กรุณาพิมพ์คำศัพท์หรือประโยคอย่างน้อย 1 บรรทัด", true);
@@ -394,28 +410,11 @@ $("fill").onclick = async () => {
   }
 };
 
-$("save").onclick = async () => {
-  let {items, detectedMode} = smartParse($("tarea").value);
-  if(!items.length) return tmsg("ยังไม่มีโจทย์ กรุณาพิมพ์อย่างน้อย 1 บรรทัด", true);
-
-  if(items.some(w => !w.hanzi || !w.th)){
-    tmsg("⏳ กำลังแปลประโยคให้อัตโนมัติก่อนเริ่ม...");
-    items = await autoCompleteWords(items);
-    $("tarea").value = toText(items);
-  }
-
-  WORDS = items;
-  try{ localStorage.setItem(KEY, JSON.stringify(WORDS)); }catch(e){}
-
-  const selMode = $("defmode").value;
-  const targetMode = selMode === "auto" ? detectedMode : selMode;
-  setModeUI(targetMode);
-  rebuild();
-  tmsg(`✓ บันทึกโจทย์ ${WORDS.length} ข้อแล้ว! พร้อมให้นักเรียนฝึกในโหมด "${targetMode === 'th2zh' ? 'ดูไทย พูดจีน' : targetMode === 'zh2th' ? 'ดูจีน พูดไทย' : 'ดูจีน พูดจีน'}"`);
-};
+$("save").onclick = saveWords;
 
 $("sharelink").onclick = async () => {
-  await $("save").onclick();
+  const ok = await saveWords();
+  if(!ok) return;
   const payload = btoa(unescape(encodeURIComponent(JSON.stringify({w: WORDS, m: mode}))));
   const url = `${location.origin}${location.pathname}?q=${payload}`;
   navigator.clipboard.writeText(url)
