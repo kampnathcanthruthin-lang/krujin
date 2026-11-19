@@ -1,824 +1,431 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบฝึกพูดภาษาจีน - Classroom Edition</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
-  <style>
-    .liquid-glass {
-      background: rgba(18, 18, 22, 0.4);
-      background-blend-mode: luminosity;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: none;
-      box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 30px 60px rgba(0,0,0,0.5);
-      position: relative;
-      overflow: hidden;
-    }
-    .liquid-glass::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 1.5px;
-      background: linear-gradient(180deg,
-        rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 20%,
-        rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
-        rgba(255,255,255,0.1) 80%, rgba(255,255,255,0.4) 100%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ฝึกพูดภาษาจีน</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&family=Noto+Serif+SC:wght@600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f5f3;--card:#fff;--ink:#1d2a26;--mute:#6b7b75;--line:#d9e1dd;--ok:#2e9e6b;--okbg:#e3f5ec;--no:#c8553d;--nobg:#fbe9e5;--seal:#b5372b;--gold:#d97706}
+@media(prefers-color-scheme:dark){:root{--bg:#141b18;--card:#1d2723;--ink:#eef3f0;--mute:#9aaba4;--line:#33423c;--okbg:#17382a;--nobg:#3d2019}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans Thai",system-ui,sans-serif;line-height:1.6}
+main{max-width:580px;margin:0 auto;padding:20px 16px 50px}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+h1{font-size:1.2rem;margin:0}.score{color:var(--mute);font-size:.92rem;font-weight:600}
+.seg{display:flex;gap:6px;margin-bottom:10px}
+.seg button{flex:1;padding:8px 4px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;font:inherit;font-size:.85rem;cursor:pointer;transition:.15s}
+.seg button[aria-pressed=true]{border-color:var(--seal);box-shadow:inset 0 0 0 1px var(--seal);font-weight:600;background:rgba(181,55,43,.06)}
+.bar{height:6px;background:var(--line);border-radius:3px;margin:14px 0;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--ok);transition:width .3s}
+.card{background:var(--card);border:2px solid var(--line);border-radius:16px;padding:28px 20px;text-align:center;transition:background .25s,border-color .25s}
+.card.ok{background:var(--okbg);border-color:var(--ok)}.card.no{background:var(--nobg);border-color:var(--no)}
+.prompt-badge{display:inline-block;font-size:.78rem;padding:2px 10px;border-radius:99px;background:var(--bg);color:var(--mute);margin-bottom:10px;border:1px solid var(--line)}
+.emoji{font-size:3rem;line-height:1.2;margin:0 0 6px}
+.hanzi{font-family:"Noto Serif SC","Songti SC",serif;font-size:clamp(2.4rem,10vw,3.8rem);line-height:1.25;margin:0}
+.pinyin{font-size:1.2rem;color:var(--seal);margin:4px 0 0}
+.meaning{color:var(--mute);margin:6px 0 0;font-size:1.05rem}
+.meaning.big{color:var(--ink);font-size:clamp(1.6rem,6vw,2.2rem);font-weight:700;line-height:1.35}
+[hidden]{display:none!important}
+.mini{margin:16px 5px 0;background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;padding:6px 16px;font:inherit;font-size:.88rem;cursor:pointer}
+.mini:hover{border-color:var(--ink)}
+.mic{display:block;margin:22px auto 10px;width:84px;height:84px;border-radius:50%;border:0;background:var(--seal);color:#fff;font-size:2rem;cursor:pointer;box-shadow:0 4px 14px rgba(181,55,43,.3)}
+.mic.on{animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 14px rgba(181,55,43,.2)}}
+@media(prefers-reduced-motion:reduce){.mic.on{animation:none}}
+button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #3b82f6;outline-offset:2px}
+.status{text-align:center;min-height:3.4em;margin:0}.heard{color:var(--mute);font-size:.9rem}
+.verdict{font-weight:700;font-size:1.1rem}.verdict.ok{color:var(--ok)}.verdict.no{color:var(--no)}
+.nav{display:flex;gap:10px;margin-top:16px}
+.nav button{flex:1;padding:12px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;cursor:pointer;font-weight:600}
+.nav #shuffle{flex:0 0 auto}.nav #next{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.warn{background:var(--nobg);border-radius:10px;padding:12px;margin-bottom:14px;display:none;font-size:.9rem}
 
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%;background:#050507;color:#fff;font-family:'Plus Jakarta Sans', sans-serif; -webkit-font-smoothing:antialiased; overflow-x: hidden;}
-    
-    main {
-      position: relative;
-      width: 100%;
-      min-height: 100vh;
-      overflow-x: hidden;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-bottom: 50px;
-    }
-
-    video {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: 0;
-    }
-
-    .content-wrapper {
-      position: relative;
-      z-index: 10;
-      width: 100%;
-      max-width: 820px;
-      margin: 0 auto;
-      padding: 40px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      flex: 1;
-    }
-
-    .top-bar {
-      width: 100%;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    .btn-top {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      color: rgba(255, 255, 255, 0.85);
-      padding: 8px 16px;
-      border-radius: 50px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      transition: all 0.2s;
-    }
-    .btn-top:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
-
-    .score-badge {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 6px 16px;
-      border-radius: 50px;
-      font-size: 13px;
-      font-weight: 600;
-      margin-bottom: 20px;
-      backdrop-filter: blur(10px);
-      letter-spacing: 0.05em;
-      cursor: pointer;
-    }
-
-    .app-card {
-      background: rgba(15, 15, 20, 0.5);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border-radius: 2rem;
-      padding: 42px;
-      width: 100%;
-      box-shadow: inset 0 1px 1px rgba(255,255,255,0.15), 0 30px 60px rgba(0,0,0,0.6);
-      border: 1px solid rgba(255,255,255,0.06);
-      text-align: center;
-      position: relative;
-      overflow: visible;
-    }
-    .app-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 1.5px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.15) 100%);
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
-    }
-
-    h1 { color: #fff; font-size: 26px; margin-bottom: 6px; font-weight: 600; letter-spacing: -0.01em; }
-    .subtitle { color: rgba(255,255,255,0.55); font-size: 13px; margin-bottom: 20px; font-weight: 400; letter-spacing: 0.02em; }
-
-    .mode-selector {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    .btn-mode {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      color: rgba(255, 255, 255, 0.65);
-      padding: 10px 16px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-mode.active {
-      background: rgba(56, 189, 248, 0.2);
-      border-color: #38bdf8;
-      color: #38bdf8;
-    }
-
-    .public-target-box {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 18px;
-      margin-bottom: 24px;
-      text-align: left;
-    }
-    .public-target-box label { font-weight: 500; color: rgba(255, 255, 255, 0.7); font-size: 12px; display: block; margin-bottom: 6px; letter-spacing: 0.03em; text-transform: uppercase; }
-    .public-target-box input {
-      width: 100%;
-      padding: 12px 14px;
-      font-size: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.35);
-      color: #fff;
-      outline: none;
-      box-sizing: border-box;
-      font-family: inherit;
-      margin-bottom: 10px;
-    }
-    .public-target-box button {
-      background: #4ade80;
-      color: #0f172a;
-      border: none;
-      padding: 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      width: 100%;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-    .public-target-box button:hover { background: #22c55e; }
-
-    .teacher-box {
-      display: none;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(74, 222, 128, 0.3);
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 24px;
-      text-align: left;
-      animation: fadeIn 0.4s ease;
-    }
-    .teacher-box label { font-weight: 500; color: #86efac; font-size: 12px; display: block; margin-bottom: 8px; letter-spacing: 0.03em; text-transform: uppercase; }
-    .teacher-box textarea {
-      width: 100%;
-      padding: 12px 14px;
-      font-size: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      background: rgba(0, 0, 0, 0.35);
-      color: #fff;
-      outline: none;
-      box-sizing: border-box;
-      font-family: inherit;
-      margin-bottom: 12px;
-      resize: vertical;
-      height: 90px;
-    }
-    .teacher-box button {
-      background: #38bdf8;
-      color: #0f172a;
-      border: none;
-      padding: 12px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: 600;
-      width: 100%;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-    .teacher-box button:hover { background: #0ea5e9; }
-
-    .target-box {
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px dashed rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      padding: 24px;
-      margin: 20px 0;
-    }
-    .prompt-text { font-size: 32px; color: #38bdf8; margin-bottom: 6px; font-weight: 700; letter-spacing: 0.05em; }
-    .prompt-hint { font-size: 13px; color: rgba(255, 255, 255, 0.45); margin-top: 4px; }
-
-    .reveal-box {
-      display: none;
-      background-color: rgba(16, 126, 60, 0.25);
-      border: 1px solid rgba(74, 222, 128, 0.5);
-      border-radius: 14px;
-      padding: 20px;
-      margin-top: 20px;
-      backdrop-filter: blur(10px);
-      animation: fadeIn 0.4s ease;
-    }
-    .meaning { font-size: 16px; color: #86efac; font-weight: 600; margin-bottom: 8px; }
-    .success-title { font-size: 20px; color: #bbf7d0; font-weight: 600; margin-bottom: 4px; }
-
-    .error-box {
-      display: none;
-      background-color: rgba(153, 27, 27, 0.25);
-      border: 1px solid rgba(248, 113, 113, 0.5);
-      border-radius: 14px;
-      padding: 20px;
-      margin-top: 20px;
-      color: #fca5a5;
-      font-size: 16px;
-      font-weight: 600;
-      backdrop-filter: blur(10px);
-      animation: fadeIn 0.4s ease;
-    }
-
-    .btn-mic {
-      background: #ffffff;
-      color: #0f172a;
-      border: none;
-      padding: 16px 30px;
-      font-size: 16px;
-      border-radius: 50px;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 10px 25px rgba(255,255,255,0.1);
-      font-weight: 600;
-      width: 100%;
-      margin-top: 10px;
-      letter-spacing: 0.03em;
-    }
-    .btn-mic:hover { transform: scale(1.01); background: #f8fafc; box-shadow: 0 15px 30px rgba(255,255,255,0.15); }
-    .btn-mic.listening { background: #ef4444; color: #fff; animation: pulse 1.5s infinite; }
-
-    .result-box { margin-top: 16px; font-size: 14px; color: rgba(255,255,255,0.7); min-height: 24px; font-weight: 500; }
-
-    .game-section {
-      display: none;
-      background: rgba(15, 15, 20, 0.85);
-      backdrop-filter: blur(24px);
-      border-radius: 2rem;
-      padding: 30px;
-      width: 100%;
-      border: 1px solid rgba(255,255,255,0.12);
-      margin-top: 20px;
-      animation: fadeIn 0.4s ease;
-      text-align: center;
-    }
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 20px;
-    }
-    .game-card {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 18px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      min-height: 70px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      word-break: break-word;
-    }
-    .game-card:hover { background: rgba(255, 255, 255, 0.12); }
-    .game-card.selected { background: #38bdf8; color: #0f172a; border-color: #38bdf8; }
-    .game-card.matched { background: #22c55e; color: #fff; border-color: #22c55e; opacity: 0.6; pointer-events: none; }
-
-    @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
-    @keyframes fadeIn { 0% { opacity: 0; transform: translateY(4px); } 100% { opacity: 1; transform: translateY(0); } }
-
-    .confetti-particle {
-      position: fixed;
-      width: 10px;
-      height: 10px;
-      background: #fbbf24;
-      pointer-events: none;
-      z-index: 999;
-      opacity: 0.9;
-      animation: fall linear forwards;
-    }
-    @keyframes fall {
-      0% { transform: translateY(-20px) rotate(0deg) scale(0.5); opacity: 1; }
-      100% { transform: translateY(105vh) rotate(720deg) scale(1.2); opacity: 0; }
-    }
-
-    footer {
-      width: 100%;
-      max-width: 820px;
-      margin-top: 50px;
-      border-radius: 2rem;
-      padding: 2.5rem;
-      color: rgba(255, 255, 255, 0.7);
-    }
-    .credit-box {
-      margin-top: 8px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-      font-size: 0.875rem;
-      color: rgba(255, 255, 255, 0.85);
-      font-weight: 500;
-    }
-  </style>
+/* โหมดครู */
+.tbtn{display:block;margin:26px auto 0;background:none;border:0;color:var(--mute);font:inherit;font-size:.92rem;text-decoration:underline;cursor:pointer}
+.teacher{display:none;margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.teacher.open{display:block}
+.teacher h2{font-size:1rem;margin:0 0 6px}
+.teacher p{margin:0 0 10px;font-size:.86rem;color:var(--mute)}
+.teacher textarea{width:100%;min-height:170px;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-size:.95rem;line-height:1.6}
+.t-opt{display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap;font-size:.86rem}
+.t-opt select,.t-opt input{padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:inherit;font-size:.85rem}
+.t-opt input{flex:1;min-width:160px}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.row button{flex:1;min-width:110px;padding:10px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.88rem;cursor:pointer;font-weight:600}
+.row #save{background:var(--ok);border-color:var(--ok);color:#fff}
+.row #fill{background:var(--gold);border-color:var(--gold);color:#fff}
+.row #sharelink{background:#2563eb;border-color:#2563eb;color:#fff}
+#tmsg{min-height:1.4em;margin-top:10px;font-size:.88rem;font-weight:600;color:var(--ok)}
+</style>
 </head>
 <body>
-
 <main>
-  <video autoplay muted loop playsinline>
-    <source src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260429_114316_1c7889ad-2885-410e-b493-98119fee0ddb.mp4" type="video/mp4">
-  </video>
+  <header>
+    <h1>ฝึกพูดภาษาจีน</h1>
+    <span class="score" id="score">ถูก 0 / 0</span>
+  </header>
+  <div class="warn" id="warn">เบราว์เซอร์นี้ไม่รองรับการรู้จำเสียง กรุณาใช้ Chrome หรือ Edge (เปิดผ่าน https)</div>
 
-  <div class="content-wrapper">
-    
-    <div class="top-bar">
-      <button class="btn-top" onclick="toggleGameSection()">เล่นมินิเกมจับคู่คำศัพท์</button>
-      <button class="btn-top" onclick="toggleTeacherMode()">โหมดคุณครู</button>
-    </div>
-
-    <div class="score-badge" onclick="forcePass()" title="คลิกเพื่อช่วยกดผ่านให้นักเรียน">
-      <span>⭐ คะแนนสะสม (คลิกช่วยผ่าน):</span>
-      <span id="scoreCount" style="color: #fbbf24; font-weight: 700; font-size: 15px;">0</span>
-      <span>ดาว</span>
-    </div>
-
-    <div class="game-section" id="gameSection">
-      <h2>มินิเกมจับคู่คำศัพท์</h2>
-      <div style="font-size: 13px; color: rgba(255,255,255,0.6); margin-top: 4px;">คลิกจับคู่ตัวอักษรจีนตัวย่อกับคำแปลภาษาไทยให้ถูกต้อง</div>
-      <div class="game-grid" id="gameGrid"></div>
-      <button onclick="toggleGameSection()" style="margin-top: 20px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 500;">ปิดเกมและไปฝึกพูด</button>
-    </div>
-
-    <div class="app-card" id="appCard">
-      <h1>ระบบฝึกพูดภาษาจีน</h1>
-      <div class="subtitle">ฝึกทักษะการแปลความหมายและออกเสียง</div>
-
-      <div class="mode-selector">
-        <button class="btn-mode active" id="btnModeThaiToChina" onclick="switchMode('th-zh')">🇹🇭 ครูพิมพ์ไทย ➔ เด็กพูดจีน</button>
-        <button class="btn-mode" id="btnModeChinaToThai" onclick="switchMode('zh-th')">🇨🇳 ครูพิมพ์จีน ➔ เด็กพูดไทย</button>
-      </div>
-
-      <div class="public-target-box">
-        <label id="inputLabel">พิมพ์โจทย์ภาษาไทย และเฉลยภาษาจีนตัวย่อ (คั่นด้วยเครื่องหมาย |)</label>
-        <input type="text" id="targetInput" value="ชอบ | 喜欢" placeholder="เช่น ชอบ | 喜欢">
-        <button onclick="setCustomTarget()">บันทึกและเปลี่ยนโจทย์</button>
-      </div>
-
-      <div class="teacher-box" id="teacherBox">
-        <label>ตั้งค่าคำศัพท์สำหรับมินิเกมจับคู่ (รูปแบบ: จีนตัวย่อ|ไทย คั่นด้วยบรรทัดใหม่)</label>
-        <textarea id="customPairsInput">你好|สวัสดี
-老师|คุณครู
-学生|นักเรียน
-谢谢|ขอบคุณ</textarea>
-        <button onclick="saveCustomPairs()">อัปเดตคำศัพท์ในมินิเกม</button>
-      </div>
-
-      <div class="target-box">
-        <div style="font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 4px;" id="displayLabel">โจทย์ (ภาษาไทย)</div>
-        <div class="prompt-text" id="targetDisplay">ชอบ</div>
-        <div class="prompt-hint" id="displayHint">(นักเรียนต้องพูดออกเสียงเป็นภาษาจีนตัวย่อตามความหมายด้านบน)</div>
-      </div>
-
-      <button class="btn-mic" id="micBtn" onclick="toggleListening()">เริ่มบันทึกเสียง</button>
-
-      <div class="result-box" id="resultText">คลิกปุ่มเพื่อเริ่มบันทึกเสียงพูดตามโจทย์</div>
-      
-      <div class="reveal-box" id="revealBox">
-        <div class="success-title">ยอดเยี่ยม! ถูกต้อง (+1 ดาว)</div>
-        <div class="meaning" id="targetMeaningDisplay" style="font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.9); margin-top: 4px;"></div>
-        <button id="btnSpeakSample" style="margin-top: 14px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px; font-family: inherit; transition: background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.25)'" onmouseout="this.style.background='rgba(255,255,255,0.15)'" onclick="speakTarget()">ฟังเสียงตัวอย่างภาษาจีน</button>
-      </div>
-
-      <div class="error-box" id="errorBox">
-        การออกเสียงยังไม่ถูกต้อง ลองใหม่อีกครั้ง
-      </div>
-    </div>
-
-    <footer class="liquid-glass">
-      <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 256 256" fill="currentColor">
-            <path d="M 4.688 136 C 68.373 136 120 187.627 120 251.312 C 120 252.883 119.967 254.445 119.905 256 L 0 256 L 0 136.096 C 1.555 136.034 3.117 136 4.688 136 Z M 251.312 136 C 252.883 136 254.445 136.034 256 136.096 L 256 256 L 136.095 256 C 136.032 254.438 136.001 252.875 136 251.312 C 136 187.627 187.627 136 251.312 136 Z M 119.905 0 C 119.967 1.555 120 3.117 120 4.688 C 120 68.373 68.373 120 4.687 120 C 3.117 120 1.555 119.967 0 119.905 L 0 0 Z M 256 119.905 C 254.445 119.967 252.883 120 251.312 120 C 187.627 120 136 68.373 136 4.687 C 136 3.117 136.033 1.555 136.095 0 L 256 0 Z" />
-          </svg>
-          <span style="font-size: 1.1rem; font-weight: 600; color: #fff; letter-spacing: 0.05em;">LUMINA</span>
-        </div>
-        <p style="font-size: 0.8125rem; line-height: 1.6; max-width: 28rem; opacity: 0.55; font-weight: 300;">
-          Lumina provides premium clarity on global events and cosmic wonders - shared with all for free.
-        </p>
-        <div class="credit-box">
-          จัดทำโดย นาย กัมปนาท จันทรุทิน ชั้นมัธยมศึกษาปีที่ 6/8
-        </div>
-      </div>
-    </footer>
-
+  <div class="seg" id="modes" role="group" aria-label="โหมดการฝึก">
+    <button data-m="zh" aria-pressed="true">ดูจีน พูดจีน</button>
+    <button data-m="th2zh" aria-pressed="false">ดูไทย พูดจีน</button>
+    <button data-m="zh2th" aria-pressed="false">ดูจีน พูดไทย</button>
   </div>
+  <div class="seg" id="levels" role="group" aria-label="ระดับความเข้มงวด">
+    <button data-t="0.5" aria-pressed="false">ผ่อนปรน</button>
+    <button data-t="0.7" aria-pressed="true">ปานกลาง</button>
+    <button data-t="1" aria-pressed="false">เข้ม</button>
+  </div>
+  <div class="bar" aria-hidden="true"><span id="barfill"></span></div>
+
+  <section class="card" id="card">
+    <span class="prompt-badge" id="pbadge">โจทย์</span>
+    <p class="emoji" id="emoji"></p>
+    <p class="hanzi" id="hanzi"></p>
+    <p class="pinyin" id="pinyin"></p>
+    <p class="meaning" id="meaning"></p>
+    <div>
+      <button class="mini" id="listen">🔊 ฟังเสียงตัวอย่าง</button>
+      <button class="mini" id="reveal">👁️ ดูเฉลย</button>
+    </div>
+  </section>
+
+  <button class="mic" id="mic" aria-label="กดเพื่อพูด">🎤</button>
+  <p class="status" id="status" aria-live="polite"></p>
+  <div class="nav">
+    <button id="prev">← ก่อนหน้า</button>
+    <button id="shuffle" aria-label="สุ่มลำดับคำ">🔀</button>
+    <button id="next">ข้อต่อไป →</button>
+  </div>
+
+  <button class="tbtn" id="ttoggle">👩‍🏫 โหมดคุณครู: พิมพ์โจทย์ / สร้างชุดคำศัพท์เอง</button>
+  <section class="teacher" id="teacher">
+    <h2>กำหนดโจทย์ให้นักเรียน (พิมพ์อิสระ บรรทัดละ 1 ข้อ)</h2>
+    <p>คุณครูพิมพ์อะไรลงไปก็ได้เลย เช่น พิมพ์แค่ <b>ฉันเป็นคนไทย</b> หรือ <b>我是泰国人</b> หรือจะพิมพ์คู่กันก็ได้ ระบบจะแปลและเติมพินอินให้อัตโนมัติทันทีที่กดบันทึก!</p>
+    <textarea id="tarea" spellcheck="false" placeholder="ตัวอย่างการพิมพ์:&#10;ฉันเป็นคนไทย&#10;วันนี้อากาศดีมาก&#10;我想喝水&#10;ขอบคุณมาก | 谢谢你"></textarea>
+
+    <div class="t-opt">
+      <label for="defmode">โหมดเริ่มต้น:</label>
+      <select id="defmode">
+        <option value="auto">อัตโนมัติ (ตามภาษาที่ครูพิมพ์)</option>
+        <option value="th2zh">ดูโจทย์ไทย → พูดจีน</option>
+        <option value="zh">ดูโจทย์จีน → พูดจีน</option>
+        <option value="zh2th">ดูโจทย์จีน → พูดไทย</option>
+      </select>
+    </div>
+
+    <div class="t-opt">
+      <label for="apikey">Gemini API Key (ไม่บังคับ):</label>
+      <input type="password" id="apikey" placeholder="ใส่เพื่อให้ AI เติมพินอิน/คำพ้องเสียงแม่นยำขึ้น">
+    </div>
+
+    <div class="row">
+      <button id="fill">✨ แปล/เติมพินอิน</button>
+      <button id="save">💾 บันทึกและเริ่มใช้</button>
+      <button id="sharelink">🔗 คัดลอกลิงก์ให้นักเรียน</button>
+      <button id="reset">คืนค่าเริ่มต้น</button>
+    </div>
+    <p id="tmsg" aria-live="polite"></p>
+  </section>
 </main>
 
 <script>
-  let currentMode = 'th-zh'; // 'th-zh' = ครูพิมพ์ไทยพูดจีน | 'zh-th' = ครูพิมพ์จีนพูดไทย
-  let targetChinese = "喜欢";
-  let targetThai = "ชอบ";
-  let promptDisplay = "ชอบ";
-  let isListening = false;
-  let totalScore = 0;
-  let hasScoredForCurrent = false;
+const DEFAULT_WORDS = [
+  {hanzi:"你好", pinyin:"nǐ hǎo", th:"สวัสดี", emoji:"👋", alt:["你号","尼好"]},
+  {hanzi:"谢谢", pinyin:"xièxie", th:"ขอบคุณ", emoji:"🙏", alt:["谢谢你","写写"]},
+  {hanzi:"我是泰国人", pinyin:"wǒ shì Tàiguórén", th:"ฉันเป็นคนไทย", emoji:"🇹🇭", alt:["我是泰国人的"]},
+  {hanzi:"再见", pinyin:"zàijiàn", th:"ลาก่อน/แล้วพบกันใหม่", emoji:"🖐️", alt:["在见","再建"]},
+  {hanzi:"我是学生", pinyin:"wǒ shì xuésheng", th:"ฉันเป็นนักเรียน", emoji:"🧑‍🎓", alt:["我是学生的"]},
+  {hanzi:"老师好", pinyin:"lǎoshī hǎo", th:"สวัสดีครับ/ค่ะ คุณครู", emoji:"🧑‍🏫", alt:["老师号","老湿好"]},
+  {hanzi:"对不起", pinyin:"duìbuqǐ", th:"ขอโทษ", emoji:"😔", alt:["对不齐","对不起你"]},
+  {hanzi:"没关系", pinyin:"méi guānxi", th:"ไม่เป็นไร", emoji:"👌", alt:["没关系啊","没关系的"]}
+];
 
-  const TEACHER_PASSWORD = "123";
+const KEY = "zh-words-v2";
+const KEY_API = "zh-gemini-key";
+let WORDS = DEFAULT_WORDS;
+let pool = [], i = 0, mode = "zh", threshold = 0.7, right = 0, total = 0, streak = 0, listening = false, revealed = false;
 
-  let vocabPairs = [
-    { chinese: "你好", thai: "สวัสดี" },
-    { chinese: "老师", thai: "คุณครู" },
-    { chinese: "学生", thai: "นักเรียน" },
-    { chinese: "谢谢", thai: "ขอบคุณ" }
-  ];
+const $ = id => document.getElementById(id);
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const NEED = {zh: w => w.hanzi, th2zh: w => w.hanzi && w.th, zh2th: w => w.hanzi && w.th};
 
-  let selectedTile = null;
-
-  function switchMode(mode) {
-    currentMode = mode;
-    const btnThai = document.getElementById('btnModeThaiToChina');
-    const btnChina = document.getElementById('btnModeChinaToThai');
-    const inputLabel = document.getElementById('inputLabel');
-    const targetInput = document.getElementById('targetInput');
-    const displayLabel = document.getElementById('displayLabel');
-    const displayHint = document.getElementById('displayHint');
-
-    if (mode === 'th-zh') {
-      btnThai.classList.add('active');
-      btnChina.classList.remove('active');
-      inputLabel.innerText = "พิมพ์โจทย์ภาษาไทย และเฉลยภาษาจีนตัวย่อ (คั่นด้วยเครื่องหมาย |)";
-      targetInput.value = "ชอบ | 喜欢";
-      targetInput.placeholder = "เช่น ชอบ | 喜欢";
-      displayLabel.innerText = "โจทย์ (ภาษาไทย)";
-      displayHint.innerText = "(นักเรียนต้องพูดออกเสียงเป็นภาษาจีนตัวย่อตามความหมายด้านบน)";
-      targetThai = "ชอบ";
-      targetChinese = "喜欢";
-      promptDisplay = targetThai;
-    } else {
-      btnChina.classList.add('active');
-      btnThai.classList.remove('active');
-      inputLabel.innerText = "พิมพ์โจทย์ภาษาจีนตัวย่อ และคำแปลภาษาไทย (คั่นด้วย | เช่น 喜欢 | ชอบ)";
-      targetInput.value = "喜欢 | ชอบ";
-      targetInput.placeholder = "เช่น 喜欢 | ชอบ";
-      displayLabel.innerText = "โจทย์ (ภาษาจีนตัวย่อ)";
-      displayHint.innerText = "(นักเรียนต้องพูดแปลเป็นภาษาไทยตามความหมายด้านบน)";
-      targetChinese = "喜欢";
-      targetThai = "ชอบ";
-      promptDisplay = targetChinese;
-    }
-
-    hasScoredForCurrent = false;
-    document.getElementById('targetDisplay').innerText = promptDisplay;
-    document.getElementById('revealBox').style.display = 'none';
-    document.getElementById('errorBox').style.display = 'none';
-    document.getElementById('resultText').innerText = 'คลิกปุ่มเพื่อเริ่มบันทึกเสียงพูดตามโจทย์';
-  }
-
-  function toggleTeacherMode() {
-    const password = prompt("กรุณากรอกรหัสผ่านสำหรับคุณครู (PIN: 123):");
-    if (password === TEACHER_PASSWORD) {
-      const teacherBox = document.getElementById('teacherBox');
-      if (teacherBox.style.display === 'block') {
-        teacherBox.style.display = 'none';
-        alert("ออกจากโหมดคุณครูแล้ว");
-      } else {
-        teacherBox.style.display = 'block';
-        alert("เข้าสู่โหมดคุณครูสำเร็จ!");
-      }
-    } else if (password !== null) {
-      alert("รหัสผ่านไม่ถูกต้อง!");
-    }
-  }
-
-  function toggleGameSection() {
-    const gameSec = document.getElementById('gameSection');
-    const appCard = document.getElementById('appCard');
-    if (gameSec.style.display === 'block') {
-      gameSec.style.display = 'none';
-      appCard.style.display = 'block';
-    } else {
-      gameSec.style.display = 'block';
-      appCard.style.display = 'none';
-      initGame();
-    }
-  }
-
-  function initGame() {
-    const grid = document.getElementById('gameGrid');
-    grid.innerHTML = '';
-    selectedTile = null;
-
-    let tiles = [];
-    vocabPairs.forEach((pair, index) => {
-      tiles.push({ text: pair.chinese, pairId: index, type: 'chinese' });
-      tiles.push({ text: pair.thai, pairId: index, type: 'thai' });
-    });
-
-    tiles.sort(() => Math.random() - 0.5);
-
-    tiles.forEach(tileData => {
-      const card = document.createElement('div');
-      card.className = 'game-card';
-      card.innerText = tileData.text;
-      card.onclick = () => handleCardClick(card, tileData);
-      grid.appendChild(card);
-    });
-  }
-
-  function handleCardClick(card, tileData) {
-    if (card.classList.contains('matched') || card.classList.contains('selected')) return;
-
-    if (!selectedTile) {
-      selectedTile = { card, tileData };
-      card.classList.add('selected');
-    } else {
-      if (selectedTile.tileData.pairId === tileData.pairId && selectedTile.tileData.type !== tileData.type) {
-        card.classList.add('matched');
-        selectedTile.card.classList.add('matched');
-        selectedTile.card.classList.remove('selected');
-        selectedTile = null;
-
-        playSuccessChime();
-
-        if (document.querySelectorAll('.game-card.matched').length === vocabPairs.length * 2) {
-          setTimeout(() => {
-            totalScore += 2;
-            document.getElementById('scoreCount').innerText = totalScore;
-            triggerCelebration();
-            alert("ยอดเยี่ยม! จับคู่คำศัพท์ถูกต้องทั้งหมด รับไปเลย +2 ดาว!");
-            toggleGameSection();
-          }, 300);
-        }
-      } else {
-        card.classList.add('selected');
-        setTimeout(() => {
-          card.classList.remove('selected');
-          selectedTile.card.classList.remove('selected');
-          selectedTile = null;
-        }, 400);
-      }
-    }
-  }
-
-  function saveCustomPairs() {
-    const rawText = document.getElementById('customPairsInput').value.trim();
-    const lines = rawText.split('\n');
-    let newPairs = [];
-
-    lines.forEach(line => {
-      const parts = line.split('|');
-      if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
-        newPairs.push({ chinese: parts[0].trim(), thai: parts[1].trim() });
-      }
-    });
-
-    if (newPairs.length > 0) {
-      vocabPairs = newPairs;
-      alert("อัปเดตคำศัพท์สำหรับมินิเกมเรียบร้อยแล้ว!");
-      document.getElementById('teacherBox').style.display = 'none';
-    } else {
-      alert("รูปแบบไม่ถูกต้อง กรุณาใช้รูปแบบ จีนตัวย่อ|ไทย ในแต่ละบรรทัด");
-    }
-  }
-
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  let recognition;
-
-  if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-
-    recognition.onresult = function(event) {
-      const spokenText = event.results[0][0].transcript;
-      document.getElementById('resultText').innerHTML = `ระบบได้ยิน: <b style="color:#38bdf8">${spokenText}</b>`;
-      
-      const cleanSpoken = spokenText.replace(/[\s\p{P}\p{S}]/gu, "").trim();
-      let isMatch = false;
-
-      if (currentMode === 'th-zh') {
-        const targetClean = targetChinese.replace(/[\s\p{P}\p{S}]/gu, "").trim();
-        const userClean = cleanSpoken.replace(/不/g, "").replace(/bu/gi, "");
-        
-        let matchedChars = 0;
-        for (let char of targetClean) {
-          if (userClean.includes(char)) matchedChars++;
-        }
-        
-        isMatch = targetClean.length > 0 && (userClean.includes(targetClean) || (matchedChars / targetClean.length >= 0.5));
-      } else {
-        const expectedThaiClean = targetThai.replace(/[\s\p{P}\p{S}]/gu, "").trim().toLowerCase();
-        const spokenThaiClean = cleanSpoken.toLowerCase();
-        isMatch = expectedThaiClean.length > 0 && spokenThaiClean.includes(expectedThaiClean);
-      }
-
-      if (isMatch) {
-        triggerSuccess();
-      } else {
-        document.getElementById('revealBox').style.display = 'none';
-        document.getElementById('errorBox').style.display = 'block';
-      }
-    };
-
-    recognition.onerror = function(event) {
-      document.getElementById('resultText').innerHTML = `<span style="color:#fca5a5">เกิดข้อผิดพลาดในการฟังเสียง: ${event.error}</span>`;
-    };
-
-    recognition.onend = function() {
-      isListening = false;
-      const btn = document.getElementById('micBtn');
-      btn.innerText = 'เริ่มบันทึกเสียง';
-      btn.classList.remove('listening');
-    };
-  } else {
-    alert("เบราว์เซอร์นี้ไม่รองรับการแปลงเสียงพูด แนะนำให้ใช้ Google Chrome ครับ");
-  }
-
-  function triggerSuccess() {
-    document.getElementById('revealBox').style.display = 'block';
-    document.getElementById('errorBox').style.display = 'none';
-    document.getElementById('resultText').innerText = '';
-    document.getElementById('targetMeaningDisplay').innerText =
-      `ภาษาไทย: ${targetThai} | ภาษาจีน: ${targetChinese}`;
-
-    if (!hasScoredForCurrent) {
-      totalScore += 1;
-      document.getElementById('scoreCount').innerText = totalScore;
-      hasScoredForCurrent = true;
-      triggerCelebration();
-      playSuccessChime();
-    }
-  }
-
-  function forcePass() {
-    triggerSuccess();
-  }
-
-  function triggerCelebration() {
-    const colors = ['#fbbf24', '#f43f5e', '#38bdf8', '#a855f7', '#4ade80'];
-    for (let i = 0; i < 40; i++) {
-      const particle = document.createElement('div');
-      particle.className = 'confetti-particle';
-      particle.style.left = Math.random() * window.innerWidth + 'px';
-      particle.style.top = '-20px';
-      particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-      
-      const size = Math.random() * 8 + 6;
-      particle.style.width = size + 'px';
-      particle.style.height = size + 'px';
-      if (Math.random() > 0.5) particle.style.borderRadius = '50%';
-
-      const duration = Math.random() * 2 + 1.5;
-      particle.style.animationDuration = duration + 's';
-      particle.style.animationDelay = Math.random() * 0.5 + 's';
-
-      document.body.appendChild(particle);
-      setTimeout(() => particle.remove(), duration * 1000);
-    }
-  }
-
-  function playSuccessChime() {
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.1);
-      osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.2);
-
-      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.4);
-    } catch (e) {}
-  }
-
-  function setCustomTarget() {
-    const inputVal = document.getElementById('targetInput').value.trim();
-    if (!inputVal) {
-      alert("กรุณากรอกโจทย์ให้เรียบร้อย");
-      return;
-    }
-
-    if (inputVal.includes('|')) {
-      const parts = inputVal.split('|');
-      const left = parts[0].trim();
-      const right = parts[1].trim();
-      if (!left || !right) {
-        alert("กรุณากรอกทั้งโจทย์และคำตอบให้ครบทั้งสองฝั่งของเครื่องหมาย |");
+// โหลดข้อมูลจาก URL (กรณีครูแชร์ลิงก์) หรือจาก localStorage
+(function initData(){
+  try{
+    const params = new URLSearchParams(location.search);
+    const shared = params.get("q");
+    if(shared){
+      const decoded = JSON.parse(decodeURIComponent(escape(atob(shared))));
+      if(Array.isArray(decoded.w) && decoded.w.length){
+        WORDS = decoded.w;
+        if(decoded.m) mode = decoded.m;
         return;
       }
+    }
+    const s = JSON.parse(localStorage.getItem(KEY) || "null");
+    if(Array.isArray(s) && s.length) WORDS = s;
+  }catch(e){}
+  try{ $("apikey").value = localStorage.getItem(KEY_API) || ""; }catch(e){}
+})();
 
-      if (currentMode === 'th-zh') {
-        targetThai = left;
-        targetChinese = right;
-        promptDisplay = targetThai;
-      } else {
-        targetChinese = left;
-        targetThai = right;
-        promptDisplay = targetChinese;
+const clean = (s, thai) => (s || "").replace(thai ? /[^\u0e00-\u0e7f]/g : /[^\u4e00-\u9fff]/g, "");
+
+function sim(a, b){
+  if(!a || !b) return 0;
+  const dp = Array.from({length:a.length+1}, () => Array(b.length+1).fill(0));
+  for(let x=1;x<=a.length;x++) for(let y=1;y<=b.length;y++)
+    dp[x][y] = a[x-1]===b[y-1] ? dp[x-1][y-1]+1 : Math.max(dp[x-1][y], dp[x][y-1]);
+  return dp[a.length][b.length] / a.length;
+}
+
+function judge(cands){
+  const w = pool[i], thai = mode === "zh2th";
+  const targets = (thai ? (w.th || "").split(/[\/,]/) : [w.hanzi].concat(w.alt || []))
+    .map(x => clean(x, thai)).filter(Boolean);
+  let best = 0;
+  for(const h of cands.map(x => clean(x, thai)))
+    for(const t of targets){ if(h === t) return {ok:true, heard:h}; best = Math.max(best, sim(t, h)); }
+  return {ok: best >= threshold, heard: clean(cands[0], thai)};
+}
+
+function setModeUI(m){
+  mode = m;
+  document.querySelectorAll("#modes button").forEach(x => x.setAttribute("aria-pressed", x.dataset.m === m));
+}
+
+function draw(){
+  const w = pool[i];
+  const hideZh = mode === "th2zh" && !revealed;
+  const hideTh = mode === "zh2th" && !revealed;
+
+  $("pbadge").textContent = mode === "th2zh" ? "โจทย์ภาษาไทย • พูดตอบเป็นภาษาจีน" :
+                            mode === "zh2th" ? "โจทย์ภาษาจีน • พูดแปลเป็นภาษาไทย" : "โจทย์ภาษาจีน • พูดออกเสียงตาม";
+
+  $("emoji").textContent = w.emoji || "";
+  $("hanzi").textContent = w.hanzi || "";   $("hanzi").hidden = hideZh;
+  $("pinyin").textContent = w.pinyin || ""; $("pinyin").hidden = hideZh || !w.pinyin;
+  $("meaning").textContent = w.th || "";    $("meaning").hidden = hideTh;
+  $("meaning").className = "meaning" + (mode === "th2zh" ? " big" : "");
+
+  $("listen").hidden = hideZh;
+  $("reveal").hidden = revealed || mode === "zh";
+  $("barfill").style.width = ((i+1) / pool.length * 100) + "%";
+}
+
+function show(){
+  if(!pool.length){
+    $("card").className = "card"; ["emoji","hanzi","pinyin"].forEach(k => $(k).textContent = "");
+    $("meaning").className = "meaning"; $("meaning").hidden = false;
+    $("meaning").textContent = "ไม่มีคำศัพท์ที่ใช้ได้ในโหมดนี้ ลองเพิ่มโจทย์ในโหมดคุณครู";
+    $("listen").hidden = $("reveal").hidden = true; return;
+  }
+  revealed = mode === "zh";
+  $("card").className = "card";
+  $("status").textContent = mode === "zh2th" ? "ดูโจทย์จีน แล้วกดไมค์พูดแปลเป็นภาษาไทย" :
+    mode === "th2zh" ? "ดูโจทย์ไทย แล้วกดไมค์พูดเป็นภาษาจีน" : "กดไมค์แล้วพูดตามโจทย์ภาษาจีน";
+  draw();
+}
+
+function rebuild(){ pool = WORDS.filter(NEED[mode]); i = 0; show(); }
+
+function speak(){
+  if(!("speechSynthesis" in window) || !pool.length) return;
+  const u = new SpeechSynthesisUtterance(pool[i].hanzi);
+  u.lang = "zh-CN"; u.rate = .8; speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+function listen(){
+  if(!SR){ $("warn").style.display = "block"; return; }
+  if(listening || !pool.length) return;
+  const r = new SR();
+  r.lang = mode === "zh2th" ? "th-TH" : "zh-CN"; r.interimResults = false; r.maxAlternatives = 5;
+  r.onstart = () => { listening = true; $("mic").classList.add("on"); $("status").textContent = "กำลังฟัง… พูดได้เลย"; };
+  r.onend = () => { listening = false; $("mic").classList.remove("on"); };
+  r.onerror = e => { $("status").textContent = e.error === "not-allowed" ? "กรุณาอนุญาตการใช้ไมโครโฟน" :
+    e.error === "no-speech" ? "ไม่ได้ยินเสียง ลองพูดดังขึ้นอีกนิด" : "เกิดข้อผิดพลาด: " + e.error; };
+  r.onresult = e => {
+    const res = judge([...e.results[0]].map(a => a.transcript));
+    $("card").className = "card " + (res.ok ? "ok" : "no");
+    $("status").innerHTML = `<span class="verdict ${res.ok?"ok":"no"}">${res.ok ? "✓ ถูกต้อง เก่งมาก!" : "ยังไม่ถูก ลองอีกครั้ง"}</span><br><span class="heard">ระบบได้ยินว่า: ${res.heard || "(ไม่ได้ยินเสียง)"}</span>`;
+    total++; if(res.ok){ right++; streak++; revealed = true; draw(); } else streak = 0;
+    $("score").textContent = `ถูก ${right} / ${total}` + (streak >= 2 ? ` 🔥${streak}` : "");
+  };
+  r.start();
+}
+
+$("mic").onclick = listen;
+$("listen").onclick = speak;
+$("reveal").onclick = () => { revealed = true; draw(); };
+$("next").onclick = () => { if(pool.length){ i = (i+1) % pool.length; show(); } };
+$("prev").onclick = () => { if(pool.length){ i = (i-1+pool.length) % pool.length; show(); } };
+$("shuffle").onclick = () => { pool = pool.slice().sort(() => Math.random() - .5); i = 0; show(); };
+document.querySelectorAll("#modes button").forEach(b => b.onclick = () => { setModeUI(b.dataset.m); rebuild(); });
+document.querySelectorAll("#levels button").forEach(b => b.onclick = () => {
+  document.querySelectorAll("#levels button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  threshold = +b.dataset.t;
+});
+
+/* ===== โหมดคุณครูอัจฉริยะ (พิมพ์อิสระ ไม่จำกัดรูปแบบ) ===== */
+const toText = ws => ws.map(w => [w.hanzi, w.pinyin, w.th, w.emoji].filter(Boolean).join(" | ")).join("\n");
+
+// แยกแยะอัตโนมัติว่าครูพิมพ์อะไรมา (ไทยล้วน, จีนล้วน, หรือมี | คั่น)
+function smartParse(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  let thaiCount = 0, zhCount = 0;
+  const items = lines.map(line => {
+    if(line.includes("|")){
+      const p = line.split("|").map(x => x.trim());
+      // เช็คว่าช่องแรกเป็นไทยหรือจีน
+      const firstIsZh = /[\u4e00-\u9fff]/.test(p[0]);
+      if(firstIsZh){
+        zhCount++;
+        return {hanzi: p[0]||"", pinyin: p[1]||"", th: p[2]||"", emoji: p[3]||"💬", alt: (p[4]||"").split(/[,，\s]+/).filter(Boolean)};
+      }else{
+        thaiCount++;
+        return {hanzi: p[1]||"", pinyin: p[2]||"", th: p[0]||"", emoji: p[3]||"💬", alt: []};
       }
-    } else {
-      if (currentMode === 'th-zh') {
-        targetThai = inputVal;
-        promptDisplay = targetThai;
-      } else {
-        targetChinese = inputVal;
-        promptDisplay = targetChinese;
+    }
+    // กรณีพิมพ์อิสระบรรทัดเดียว ไม่มีเครื่องหมาย |
+    const hasZh = /[\u4e00-\u9fff]/.test(line);
+    const hasTh = /[\u0e00-\u0e7f]/.test(line);
+    if(hasZh && !hasTh){
+      zhCount++;
+      return {hanzi: line, pinyin: "", th: "", emoji: "🇨🇳", alt: []};
+    }else if(hasTh && !hasZh){
+      thaiCount++;
+      return {hanzi: "", pinyin: "", th: line, emoji: "🇹🇭", alt: []};
+    }else{
+      // พิมพ์ปนกันในบรรทัดเดียว เช่น "ฉันเป็นคนไทย 我是泰国人"
+      const zhPart = (line.match(/[\u4e00-\u9fff，。！？、]+/g) || []).join("");
+      const thPart = line.replace(/[\u4e00-\u9fff，。！？、]+/g, "").trim();
+      thaiCount++;
+      return {hanzi: zhPart, pinyin: "", th: thPart, emoji: "💬", alt: []};
+    }
+  });
+  const detectedMode = thaiCount >= zhCount ? "th2zh" : "zh";
+  return {items, detectedMode};
+}
+
+const tmsg = (m, isErr=false) => { $("tmsg").style.color = isErr ? "var(--no)" : "var(--ok)"; $("tmsg").textContent = m; };
+
+$("ttoggle").onclick = () => {
+  if($("teacher").classList.toggle("open")) $("tarea").value = toText(WORDS);
+};
+
+// ฟังก์ชันแปลภาษาอัตโนมัติ (ใช้ Gemini API ถ้ามี Key หรือใช้ Free Translation API สำรอง)
+async function autoCompleteWords(items){
+  const needWork = items.some(w => !w.hanzi || !w.th || !w.pinyin);
+  if(!needWork) return items;
+
+  const apiKey = $("apikey").value.trim();
+  if(apiKey){
+    try{ localStorage.setItem(KEY_API, apiKey); }catch(e){}
+    const prompt = `คุณคือผู้ช่วยครูสอนภาษาจีนสำหรับเด็กไทย จงเติมข้อมูลที่ว่างของรายการต่อไปนี้ให้ครบถ้วนและเป็นธรรมชาติ
+ตอบกลับเป็น JSON Array เท่านั้น ห้ามมี markdown หรือคำอธิบายอื่น
+แต่ละออบเจกต์ต้องมี:
+- "hanzi": ภาษาจีนตัวย่อที่ตรงความหมาย (ห้ามแก้ถ้ามีอยู่แล้ว)
+- "pinyin": พินอินพร้อมวรรณยุกต์
+- "th": ความหมายภาษาไทยที่กระชับเข้าใจง่าย (ห้ามแก้ถ้ามีอยู่แล้ว)
+- "emoji": อีโมจิ 1 ตัวที่สื่อความหมาย
+- "alt": อาร์เรย์ของคำจีนเสียงพ้องที่ระบบรู้จำเสียงอาจฟังเพี้ยน (ไม่เกิน 3 คำ)
+ข้อมูลตั้งต้น: ${JSON.stringify(items)}`;
+
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({contents:[{parts:[{text: prompt}]}], generationConfig:{responseMimeType:"application/json"}})
+    });
+    if(res.ok){
+      const data = await res.json();
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+      const parsed = JSON.parse(raw);
+      return items.map((w, idx) => ({
+        hanzi: w.hanzi || parsed[idx]?.hanzi || "",
+        pinyin: w.pinyin || parsed[idx]?.pinyin || "",
+        th: w.th || parsed[idx]?.th || "",
+        emoji: parsed[idx]?.emoji || w.emoji || "💬",
+        alt: w.alt?.length ? w.alt : (parsed[idx]?.alt || [])
+      }));
+    }
+  }
+
+  // ระบบสำรองกรณีไม่ใส่ API Key: ใช้ MyMemory Free Translation API แปล ไทย <-> จีน อัตโนมัติ
+  const result = [];
+  for(const w of items){
+    let hanzi = w.hanzi, th = w.th;
+    try{
+      if(!hanzi && th){
+        const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(th)}&langpair=th|zh-CN`);
+        const d = await r.json();
+        hanzi = (d.responseData?.translatedText || "").replace(/[。！？]/g, "").trim();
+      }else if(!th && hanzi){
+        const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(hanzi)}&langpair=zh-CN|th`);
+        const d = await r.json();
+        th = (d.responseData?.translatedText || "").trim();
       }
-    }
+    }catch(e){}
+    result.push({...w, hanzi, th});
+  }
+  return result;
+}
 
-    hasScoredForCurrent = false;
-    document.getElementById('targetDisplay').innerText = promptDisplay;
-    document.getElementById('revealBox').style.display = 'none';
-    document.getElementById('errorBox').style.display = 'none';
-    document.getElementById('resultText').innerText = 'อัปเดตโจทย์เรียบร้อย พร้อมให้นักเรียนฝึกพูด';
+$("fill").onclick = async () => {
+  const {items} = smartParse($("tarea").value);
+  if(!items.length) return tmsg("กรุณาพิมพ์คำศัพท์หรือประโยคอย่างน้อย 1 บรรทัด", true);
+  tmsg("⏳ กำลังแปลและเตรียมโจทย์อัตโนมัติ...");
+  try{
+    const completed = await autoCompleteWords(items);
+    $("tarea").value = toText(completed);
+    tmsg("✓ แปลและเติมข้อมูลเรียบร้อย! ตรวจสอบความถูกต้องแล้วกด 'บันทึกและเริ่มใช้' ได้เลย");
+  }catch(e){
+    tmsg("เกิดข้อผิดพลาดในการแปล ลองตรวจสอบอินเทอร์เน็ตหรือ API Key", true);
+  }
+};
+
+$("save").onclick = async () => {
+  let {items, detectedMode} = smartParse($("tarea").value);
+  if(!items.length) return tmsg("ยังไม่มีโจทย์ กรุณาพิมพ์อย่างน้อย 1 บรรทัด", true);
+
+  // ถ้าครูพิมพ์มาแค่ภาษาเดียว ระบบจะแปลให้อัตโนมัติก่อนบันทึกทันที!
+  if(items.some(w => !w.hanzi || !w.th)){
+    tmsg("⏳ กำลังแปลประโยคให้อัตโนมัติก่อนเริ่ม...");
+    items = await autoCompleteWords(items);
+    $("tarea").value = toText(items);
   }
 
-  function toggleListening() {
-    if (!recognition) return;
-    if (isListening) {
-      recognition.stop();
-      return;
-    }
+  WORDS = items;
+  try{ localStorage.setItem(KEY, JSON.stringify(WORDS)); }catch(e){}
 
-    recognition.lang = (currentMode === 'th-zh') ? 'zh-CN' : 'th-TH';
-    const btn = document.getElementById('micBtn');
+  const selMode = $("defmode").value;
+  const targetMode = selMode === "auto" ? detectedMode : selMode;
+  setModeUI(targetMode);
+  rebuild();
+  tmsg(`✓ บันทึกโจทย์ ${WORDS.length} ข้อแล้ว! พร้อมให้นักเรียนฝึกในโหมด "${targetMode === 'th2zh' ? 'ดูไทย พูดจีน' : targetMode === 'zh2th' ? 'ดูจีน พูดไทย' : 'ดูจีน พูดจีน'}"`);
+};
 
-    try {
-      recognition.start();
-      isListening = true;
-      btn.innerText = 'กำลังฟังเสียง... (คลิกอีกครั้งเพื่อหยุด)';
-      btn.classList.add('listening');
-      document.getElementById('revealBox').style.display = 'none';
-      document.getElementById('errorBox').style.display = 'none';
-      document.getElementById('resultText').innerText = 'กำลังฟังเสียงพูดของคุณ...';
-    } catch (err) {
-      isListening = false;
-      btn.innerText = 'เริ่มบันทึกเสียง';
-      btn.classList.remove('listening');
-    }
-  }
+$("sharelink").onclick = async () => {
+  await $("save").onclick();
+  const payload = btoa(unescape(encodeURIComponent(JSON.stringify({w: WORDS, m: mode}))));
+  const url = `${location.origin}${location.pathname}?q=${payload}`;
+  navigator.clipboard.writeText(url)
+    .then(() => tmsg("🔗 คัดลอกลิงก์เรียบร้อย! ส่งลิงก์นี้ให้นักเรียนเปิดทำโจทย์ชุดนี้ได้ทันที"))
+    .catch(() => prompt("คัดลอกลิงก์ด้านล่างนี้ส่งให้นักเรียน:", url));
+};
 
-  function speakTarget() {
-    if (!targetChinese) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(targetChinese);
-    utterance.lang = 'zh-CN';
-    window.speechSynthesis.speak(utterance);
-  }
+$("reset").onclick = () => {
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  WORDS = DEFAULT_WORDS;
+  $("tarea").value = toText(WORDS);
+  setModeUI("zh");
+  rebuild();
+  tmsg("คืนค่าชุดคำศัพท์เริ่มต้นแล้ว");
+};
+
+if(!SR) $("warn").style.display = "block";
+setModeUI(mode);
+rebuild();
 </script>
-
 </body>
 </html>
