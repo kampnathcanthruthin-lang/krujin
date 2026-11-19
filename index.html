@@ -142,12 +142,11 @@ const DEFAULT_WORDS = [
   {hanzi:"没关系", pinyin:"méi guānxi", th:"ไม่เป็นไร", emoji:"👌", alt:["没关系啊","没关系的"]}
 ];
 
-const KEY = "zh-words-v3";
+const KEY = "zh-words-v4";
 const KEY_API = "zh-gemini-key";
 let WORDS = DEFAULT_WORDS;
 let pool = [], i = 0, mode = "zh", threshold = 0.82, right = 0, total = 0, streak = 0, listening = false, revealed = false;
 
-// ตัวแปลงจีนตัวเต็ม -> จีนตัวย่อ (Simplified Chinese) อัตโนมัติ
 let toSimplified = s => s || "";
 try{
   if(window.OpenCC && OpenCC.Converter){
@@ -293,21 +292,39 @@ document.querySelectorAll("#levels button").forEach(b => b.onclick = () => {
   threshold = +b.dataset.t;
 });
 
-const toText = ws => ws.map(w => [toSimplified(w.hanzi), w.pinyin, w.th, w.emoji].filter(Boolean).join(" | ")).join("\n");
+// แสดงข้อมูลในช่องพิมพ์ของครูให้ชัดเจน (เว้นช่องพินอินไว้ถ้ายังไม่มี เพื่อไม่ให้ข้อมูลเลื่อนสลับช่อง)
+const toText = ws => ws.map(w => {
+  const parts = [toSimplified(w.hanzi), w.pinyin || "", w.th || "", w.emoji || ""];
+  while(parts.length > 1 && !parts[parts.length - 1]) parts.pop();
+  return parts.join(" | ");
+}).join("\n");
 
+// แยกข้อมูลแต่ละช่องอย่างแม่นยำตามชนิดภาษา (ป้องกันคำไทยไหลไปอยู่ช่องพินอินหรือสลับช่อง)
 function smartParse(text){
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   let thaiCount = 0, zhCount = 0;
   const items = lines.map(line => {
     if(line.includes("|")){
-      const p = line.split("|").map(x => x.trim());
-      if(hasZhChar(p[0])){
-        zhCount++;
-        return {hanzi: toSimplified(p[0]||""), pinyin: p[1]||"", th: p[2]||"", emoji: p[3]||"💬", alt: (p[4]||"").split(/[,，\s]+/).filter(Boolean).map(toSimplified)};
-      }else{
-        thaiCount++;
-        return {hanzi: toSimplified(p[1]||""), pinyin: p[2]||"", th: p[0]||"", emoji: p[3]||"💬", alt: []};
+      const parts = line.split("|").map(x => x.trim()).filter(Boolean);
+      let hanzi = "", th = "", pinyin = "", emoji = "", alt = [];
+      for(const part of parts){
+        if(hasZhChar(part) && !hasThChar(part)){
+          if(!hanzi) hanzi = toSimplified(part);
+          else alt.push(...part.split(/[,，\s]+/).filter(Boolean).map(toSimplified));
+        }else if(hasThChar(part) && !hasZhChar(part)){
+          if(!th) th = part;
+        }else if(/^[a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü\s'’.,!?-]+$/.test(part) && !/^[A-Z]{2}$/.test(part)){
+          if(!pinyin) pinyin = part;
+        }else if(/[\p{Extended_Pictographic}]/u.test(part)){
+          emoji = part;
+        }
       }
+      if(hanzi && !th) zhCount++;
+      else if(th && !hanzi) thaiCount++;
+      else if(hasZhChar(parts[0])) zhCount++;
+      else thaiCount++;
+
+      return {hanzi, pinyin, th, emoji: emoji || "💬", alt};
     }
     const zh = hasZhChar(line);
     const th = hasThChar(line);
@@ -334,10 +351,8 @@ $("ttoggle").onclick = () => {
   if($("teacher").classList.toggle("open")) $("tarea").value = toText(WORDS);
 };
 
-// ปรับปรุงข้อความจีนที่ได้จากการแปลให้กระชับ ตรงตัว เป็นภาษาพูดพื้นฐานสำหรับนักเรียน
 function normalizeSimpleChinese(zh){
   let s = toSimplified(zh || "").replace(/[。！？，、.,!?]/g, "").trim();
-  // ลบคำฟุ่มเฟือยที่ระบบแปลชอบเติมเกินมา เช่น 您好 นำหน้าเมื่อไม่ได้ขอ หรือ 一名 -> อิงตามรูปประโยคสั้นกระชับ
   s = s.replace(/^您好(?=.{2,})/, "").replace(/是一名/g, "是").trim();
   return s;
 }
@@ -384,7 +399,6 @@ async function autoCompleteWords(items){
     }
   }
 
-  // ระบบแปลสำรอง (กรณีไม่ใส่ API Key): แปลและแปลงเป็นจีนตัวย่อ + ตัดคำฟุ่มเฟือยอัตโนมัติ
   const result = [];
   for(const w of items){
     let hanzi = toSimplified(w.hanzi), th = w.th;
