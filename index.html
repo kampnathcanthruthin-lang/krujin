@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ฝึกพูดภาษาจีน</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&family=Noto+Serif+SC:wght@600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/opencc-js@1.0.5/dist/umd/full.js"></script>
 <style>
 :root{--bg:#f2f5f3;--card:#fff;--ink:#1d2a26;--mute:#6b7b75;--line:#d9e1dd;--ok:#2e9e6b;--okbg:#e3f5ec;--no:#c8553d;--nobg:#fbe9e5;--seal:#b5372b;--gold:#d97706}
 @media(prefers-color-scheme:dark){:root{--bg:#141b18;--card:#1d2723;--ink:#eef3f0;--mute:#9aaba4;--line:#33423c;--okbg:#17382a;--nobg:#3d2019}}
@@ -100,8 +101,8 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
 
   <button class="tbtn" id="ttoggle">👩‍🏫 โหมดคุณครู: พิมพ์โจทย์ / สร้างชุดคำศัพท์เอง</button>
   <section class="teacher" id="teacher">
-    <h2>กำหนดโจทย์ให้นักเรียน (พิมพ์อิสระ บรรทัดละ 1 ข้อ)</h2>
-    <p>คุณครูพิมพ์อะไรลงไปก็ได้เลย เช่น พิมพ์แค่ <b>ฉันเป็นคนไทย</b> หรือ <b>我是泰国人</b> หรือจะพิมพ์คู่กันก็ได้ ระบบจะแปลและเติมพินอินให้อัตโนมัติทันทีที่กดบันทึก</p>
+    <h2>กำหนดโจทย์ให้นักเรียน (จีนตัวย่อมาตรฐาน • พิมพ์อิสระบรรทัดละ 1 ข้อ)</h2>
+    <p>คุณครูพิมพ์ภาษาไทยหรือจีนตัวย่อได้เลย เช่น พิมพ์ <b>ฉันเป็นคนไทย</b> ระบบจะแปลเป็นจีนตัวย่อที่กระชับตรงตัว (<b>我是泰国人</b>) ให้อัตโนมัติทันทีที่กดบันทึก</p>
     <textarea id="tarea" spellcheck="false" placeholder="ตัวอย่างการพิมพ์:&#10;ฉันเป็นคนไทย&#10;วันนี้อากาศดีมาก&#10;我想喝水&#10;ขอบคุณมาก | 谢谢你"></textarea>
 
     <div class="t-opt">
@@ -141,10 +142,19 @@ const DEFAULT_WORDS = [
   {hanzi:"没关系", pinyin:"méi guānxi", th:"ไม่เป็นไร", emoji:"👌", alt:["没关系啊","没关系的"]}
 ];
 
-const KEY = "zh-words-v2";
+const KEY = "zh-words-v3";
 const KEY_API = "zh-gemini-key";
 let WORDS = DEFAULT_WORDS;
 let pool = [], i = 0, mode = "zh", threshold = 0.82, right = 0, total = 0, streak = 0, listening = false, revealed = false;
+
+// ตัวแปลงจีนตัวเต็ม -> จีนตัวย่อ (Simplified Chinese) อัตโนมัติ
+let toSimplified = s => s || "";
+try{
+  if(window.OpenCC && OpenCC.Converter){
+    const conv = OpenCC.Converter({from: "t", to: "cn"});
+    toSimplified = s => conv(s || "");
+  }
+}catch(e){}
 
 const $ = id => document.getElementById(id);
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -157,20 +167,23 @@ const NEED = {zh: w => w.hanzi, th2zh: w => w.hanzi && w.th, zh2th: w => w.hanzi
     if(shared){
       const decoded = JSON.parse(decodeURIComponent(escape(atob(shared))));
       if(Array.isArray(decoded.w) && decoded.w.length){
-        WORDS = decoded.w;
+        WORDS = decoded.w.map(w => ({...w, hanzi: toSimplified(w.hanzi)}));
         if(decoded.m) mode = decoded.m;
         return;
       }
     }
     const s = JSON.parse(localStorage.getItem(KEY) || "null");
-    if(Array.isArray(s) && s.length) WORDS = s;
+    if(Array.isArray(s) && s.length) WORDS = s.map(w => ({...w, hanzi: toSimplified(w.hanzi)}));
   }catch(e){}
   try{ $("apikey").value = localStorage.getItem(KEY_API) || ""; }catch(e){}
 })();
 
 const hasZhChar = s => /[\u4e00-\u9fff]/.test(s || "");
 const hasThChar = s => /[\u0e00-\u0e7f]/.test(s || "");
-const clean = (s, thai) => (s || "").replace(thai ? /[^\u0e00-\u0e7f]/g : /[^\u4e00-\u9fff]/g, "");
+const clean = (s, thai) => {
+  const val = thai ? (s || "") : toSimplified(s || "");
+  return val.replace(thai ? /[^\u0e00-\u0e7f]/g : /[^\u4e00-\u9fff]/g, "");
+};
 
 function sim(a, b){
   if(!a || !b) return 0;
@@ -213,11 +226,11 @@ function draw(){
   const hideZh = mode === "th2zh" && !revealed;
   const hideTh = mode === "zh2th" && !revealed;
 
-  $("pbadge").textContent = mode === "th2zh" ? "โจทย์ภาษาไทย • พูดตอบเป็นภาษาจีน" :
-                            mode === "zh2th" ? "โจทย์ภาษาจีน • พูดแปลเป็นภาษาไทย" : "โจทย์ภาษาจีน • พูดออกเสียงตาม";
+  $("pbadge").textContent = mode === "th2zh" ? "โจทย์ภาษาไทย • พูดตอบเป็นจีนตัวย่อ" :
+                            mode === "zh2th" ? "โจทย์จีนตัวย่อ • พูดแปลเป็นภาษาไทย" : "โจทย์จีนตัวย่อ • พูดออกเสียงตาม";
 
   $("emoji").textContent = w.emoji || "";
-  $("hanzi").textContent = w.hanzi || "";   $("hanzi").hidden = hideZh;
+  $("hanzi").textContent = toSimplified(w.hanzi || ""); $("hanzi").hidden = hideZh;
   $("pinyin").textContent = w.pinyin || ""; $("pinyin").hidden = hideZh || !w.pinyin;
   $("meaning").textContent = w.th || "";    $("meaning").hidden = hideTh;
   $("meaning").className = "meaning" + (mode === "th2zh" ? " big" : "");
@@ -245,7 +258,7 @@ function rebuild(){ pool = WORDS.filter(NEED[mode]); i = 0; show(); }
 
 function speak(){
   if(!("speechSynthesis" in window) || !pool.length) return;
-  const u = new SpeechSynthesisUtterance(pool[i].hanzi);
+  const u = new SpeechSynthesisUtterance(toSimplified(pool[i].hanzi));
   u.lang = "zh-CN"; u.rate = .8; speechSynthesis.cancel(); speechSynthesis.speak(u);
 }
 
@@ -280,7 +293,7 @@ document.querySelectorAll("#levels button").forEach(b => b.onclick = () => {
   threshold = +b.dataset.t;
 });
 
-const toText = ws => ws.map(w => [w.hanzi, w.pinyin, w.th, w.emoji].filter(Boolean).join(" | ")).join("\n");
+const toText = ws => ws.map(w => [toSimplified(w.hanzi), w.pinyin, w.th, w.emoji].filter(Boolean).join(" | ")).join("\n");
 
 function smartParse(text){
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
@@ -290,22 +303,22 @@ function smartParse(text){
       const p = line.split("|").map(x => x.trim());
       if(hasZhChar(p[0])){
         zhCount++;
-        return {hanzi: p[0]||"", pinyin: p[1]||"", th: p[2]||"", emoji: p[3]||"💬", alt: (p[4]||"").split(/[,，\s]+/).filter(Boolean)};
+        return {hanzi: toSimplified(p[0]||""), pinyin: p[1]||"", th: p[2]||"", emoji: p[3]||"💬", alt: (p[4]||"").split(/[,，\s]+/).filter(Boolean).map(toSimplified)};
       }else{
         thaiCount++;
-        return {hanzi: p[1]||"", pinyin: p[2]||"", th: p[0]||"", emoji: p[3]||"💬", alt: []};
+        return {hanzi: toSimplified(p[1]||""), pinyin: p[2]||"", th: p[0]||"", emoji: p[3]||"💬", alt: []};
       }
     }
     const zh = hasZhChar(line);
     const th = hasThChar(line);
     if(zh && !th){
       zhCount++;
-      return {hanzi: line, pinyin: "", th: "", emoji: "🇨🇳", alt: []};
+      return {hanzi: toSimplified(line), pinyin: "", th: "", emoji: "🇨🇳", alt: []};
     }else if(th && !zh){
       thaiCount++;
       return {hanzi: "", pinyin: "", th: line, emoji: "🇹🇭", alt: []};
     }else{
-      const zhPart = (line.match(/[\u4e00-\u9fff，。！？、]+/g) || []).join("");
+      const zhPart = toSimplified((line.match(/[\u4e00-\u9fff，。！？、]+/g) || []).join(""));
       const thPart = line.replace(/[\u4e00-\u9fff，。！？、]+/g, "").trim();
       thaiCount++;
       return {hanzi: zhPart, pinyin: "", th: thPart, emoji: "💬", alt: []};
@@ -321,21 +334,35 @@ $("ttoggle").onclick = () => {
   if($("teacher").classList.toggle("open")) $("tarea").value = toText(WORDS);
 };
 
+// ปรับปรุงข้อความจีนที่ได้จากการแปลให้กระชับ ตรงตัว เป็นภาษาพูดพื้นฐานสำหรับนักเรียน
+function normalizeSimpleChinese(zh){
+  let s = toSimplified(zh || "").replace(/[。！？，、.,!?]/g, "").trim();
+  // ลบคำฟุ่มเฟือยที่ระบบแปลชอบเติมเกินมา เช่น 您好 นำหน้าเมื่อไม่ได้ขอ หรือ 一名 -> อิงตามรูปประโยคสั้นกระชับ
+  s = s.replace(/^您好(?=.{2,})/, "").replace(/是一名/g, "是").trim();
+  return s;
+}
+
 async function autoCompleteWords(items){
   const needWork = items.some(w => !w.hanzi || !w.th || !w.pinyin);
-  if(!needWork) return items;
+  if(!needWork) return items.map(w => ({...w, hanzi: toSimplified(w.hanzi)}));
 
   const apiKey = $("apikey").value.trim();
   if(apiKey){
     try{ localStorage.setItem(KEY_API, apiKey); }catch(e){}
-    const prompt = `คุณคือผู้ช่วยครูสอนภาษาจีนสำหรับเด็กไทย จงเติมข้อมูลที่ว่างของรายการต่อไปนี้ให้ครบถ้วนและเป็นธรรมชาติ
-ตอบกลับเป็น JSON Array เท่านั้น ห้ามมี markdown หรือคำอธิบายอื่น
+    const prompt = `คุณคือผู้ช่วยครูสอนภาษาจีนสำหรับนักเรียนไทย จงเติมข้อมูลที่ว่างของรายการต่อไปนี้
+กฎสำคัญที่สุด:
+1. ใช้ **ภาษาจีนตัวย่อ (简体中文)** ที่สั้น กระชับ ตรงตัว และเป็นภาษาพูดพื้นฐานระดับ HSK 1-3 เท่านั้น
+2. ห้ามเติมคำทักทายหรือคำฟุ่มเฟือยที่ไม่ได้อยู่ในประโยคต้นฉบับเด็ดขาด เช่น:
+   - "ฉันเป็นคนไทย" ต้องแปลเป็น "我是泰国人" (ห้ามเติม 您好 หรือใช้ 一名)
+   - "ฉันเป็นนักเรียน" ต้องแปลเป็น "我是学生"
+   - "ขอบคุณ" ต้องแปลเป็น "谢谢"
+3. ตอบกลับเป็น JSON Array เท่านั้น ห้ามมี markdown หรือคำอธิบายอื่น
 แต่ละออบเจกต์ต้องมี:
-- "hanzi": ภาษาจีนตัวย่อที่ตรงความหมาย (ห้ามแก้ถ้ามีอยู่แล้ว)
+- "hanzi": ภาษาจีนตัวย่อ (ห้ามแก้ถ้ามีอยู่แล้ว)
 - "pinyin": พินอินพร้อมวรรณยุกต์
 - "th": ความหมายภาษาไทยที่กระชับเข้าใจง่าย (ห้ามแก้ถ้ามีอยู่แล้ว)
 - "emoji": อีโมจิ 1 ตัวที่สื่อความหมาย
-- "alt": อาร์เรย์ของคำจีนเสียงพ้องที่ระบบรู้จำเสียงอาจฟังเพี้ยน (ไม่เกิน 3 คำ)
+- "alt": อาร์เรย์ของคำจีนตัวย่อเสียงพ้องที่ระบบรู้จำเสียงอาจฟังเพี้ยน (ไม่เกิน 3 คำ)
 ข้อมูลตั้งต้น: ${JSON.stringify(items)}`;
 
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
@@ -348,23 +375,24 @@ async function autoCompleteWords(items){
       const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
       const parsed = JSON.parse(raw);
       return items.map((w, idx) => ({
-        hanzi: w.hanzi || parsed[idx]?.hanzi || "",
+        hanzi: toSimplified(w.hanzi || parsed[idx]?.hanzi || ""),
         pinyin: w.pinyin || parsed[idx]?.pinyin || "",
         th: w.th || parsed[idx]?.th || "",
         emoji: parsed[idx]?.emoji || w.emoji || "💬",
-        alt: w.alt?.length ? w.alt : (parsed[idx]?.alt || [])
+        alt: (w.alt?.length ? w.alt : (parsed[idx]?.alt || [])).map(toSimplified)
       }));
     }
   }
 
+  // ระบบแปลสำรอง (กรณีไม่ใส่ API Key): แปลและแปลงเป็นจีนตัวย่อ + ตัดคำฟุ่มเฟือยอัตโนมัติ
   const result = [];
   for(const w of items){
-    let hanzi = w.hanzi, th = w.th;
+    let hanzi = toSimplified(w.hanzi), th = w.th;
     try{
       if(!hanzi && th){
         const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(th)}&langpair=th|zh-CN`);
         const d = await r.json();
-        hanzi = (d.responseData?.translatedText || "").replace(/[。！？]/g, "").trim();
+        hanzi = normalizeSimpleChinese(d.responseData?.translatedText || "");
       }else if(!th && hanzi){
         const r = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(hanzi)}&langpair=zh-CN|th`);
         const d = await r.json();
@@ -383,8 +411,11 @@ async function saveWords(){
     return false;
   }
   if(items.some(w => !w.hanzi || !w.th)){
-    tmsg("⏳ กำลังแปลประโยคให้อัตโนมัติก่อนเริ่ม...");
+    tmsg("⏳ กำลังแปลเป็นจีนตัวย่ออัตโนมัติ...");
     items = await autoCompleteWords(items);
+    $("tarea").value = toText(items);
+  }else{
+    items = items.map(w => ({...w, hanzi: toSimplified(w.hanzi)}));
     $("tarea").value = toText(items);
   }
   WORDS = items;
@@ -393,18 +424,18 @@ async function saveWords(){
   const targetMode = selMode === "auto" ? detectedMode : selMode;
   setModeUI(targetMode);
   rebuild();
-  tmsg(`✓ บันทึกโจทย์ ${WORDS.length} ข้อแล้ว! โหมดปัจจุบัน: "${targetMode === 'th2zh' ? 'ดูไทย พูดจีน' : targetMode === 'zh2th' ? 'ดูจีน พูดไทย' : 'ดูจีน พูดจีน'}"`);
+  tmsg(`✓ บันทึกโจทย์จีนตัวย่อ ${WORDS.length} ข้อแล้ว! โหมดปัจจุบัน: "${targetMode === 'th2zh' ? 'ดูไทย พูดจีน' : targetMode === 'zh2th' ? 'ดูจีน พูดไทย' : 'ดูจีน พูดจีน'}"`);
   return true;
 }
 
 $("fill").onclick = async () => {
   const {items} = smartParse($("tarea").value);
   if(!items.length) return tmsg("กรุณาพิมพ์คำศัพท์หรือประโยคอย่างน้อย 1 บรรทัด", true);
-  tmsg("⏳ กำลังแปลและเตรียมโจทย์อัตโนมัติ...");
+  tmsg("⏳ กำลังแปลเป็นจีนตัวย่อและเตรียมโจทย์...");
   try{
     const completed = await autoCompleteWords(items);
     $("tarea").value = toText(completed);
-    tmsg("✓ แปลและเติมข้อมูลเรียบร้อย! ตรวจสอบความถูกต้องแล้วกด 'บันทึกและเริ่มใช้' ได้เลย");
+    tmsg("✓ แปลเป็นจีนตัวย่อเรียบร้อย! ตรวจสอบแล้วกด 'บันทึกและเริ่มใช้' ได้เลย");
   }catch(e){
     tmsg("เกิดข้อผิดพลาดในการแปล ลองตรวจสอบอินเทอร์เน็ตหรือ API Key", true);
   }
